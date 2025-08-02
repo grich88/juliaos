@@ -2,17 +2,17 @@
 FROM julia:1.11.6
 
 # Set working directory
-WORKDIR /app
+WORKDIR /app/juliaos-core/julia
 
 # Copy Project.toml and Manifest.toml first for better caching
-COPY Project.toml .
-COPY Manifest.toml* .
+COPY juliaos-core/julia/Project.toml .
+COPY juliaos-core/julia/Manifest.toml* .
 
 # Install dependencies
 RUN julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
 # Copy the rest of the application
-COPY . .
+COPY juliaos-core/julia .
 
 # Set environment variables
 ENV JULIA_NUM_THREADS=3,1

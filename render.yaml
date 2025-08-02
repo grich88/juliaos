@@ -4,6 +4,7 @@ services:
     name: juliaos-backend
     env: docker
     dockerfilePath: ./juliaos-core/julia/Dockerfile
+    rootDir: .
     envVars:
       - key: JULIA_NUM_THREADS
         value: "3,1"
