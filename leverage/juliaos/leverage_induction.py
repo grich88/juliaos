@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 """
-🚀 Enhanced Leverage System - Intelligent Induction Phase
+Enhanced Leverage System - Intelligent Induction Phase
 ========================================================
 
 Automatically investigates project priorities and determines optimal

@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 """
-🚀 Enhanced Leverage System - Integration Helper v3.2.0-Enhanced
+Enhanced Leverage System - Integration Helper v3.2.0-Enhanced
 ================================================================
 
 FIXED VERSION with Intelligent Induction Phase
@@ -52,8 +53,8 @@ try:
     from universal_leverage_system_core import UniversalLeverageSystem, ServiceInfo, LeverageAnalysis
     CORE_AVAILABLE = True
 except ImportError:
-    print("⚠️  Enhanced Universal Leverage System core not found")
-    print("📁 Make sure universal_leverage_system_core.py is in the same directory")
+    print("[WARNING] Enhanced Universal Leverage System core not found")
+    print("[INFO] Make sure universal_leverage_system_core.py is in the same directory")
     CORE_AVAILABLE = False
 
 class LeverageIntegration:
@@ -83,7 +84,7 @@ try:
     from leverage_induction import LeverageInductionEngine, run_intelligent_induction as _run_intelligent_induction
     INDUCTION_AVAILABLE = True
 except ImportError:
-    print("⚠️  Induction engine not available - basic analysis only")
+    print("[WARNING] Induction engine not available - basic analysis only")
     INDUCTION_AVAILABLE = False
 
 def get_system_info() -> Dict[str, Any]:

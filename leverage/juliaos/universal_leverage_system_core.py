@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-🚀 Universal Leverage System v3.2.0-Enhanced - CORE ENGINE with Intelligent Induction
+Universal Leverage System v3.2.0-Enhanced - CORE ENGINE with Intelligent Induction
 ===================================================================================
 
 FIXED VERSION with intelligent project analysis and developer consultation.
