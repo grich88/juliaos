@@ -37,16 +37,11 @@ export const TracingView = React.memo(function TracingView({
       const endTime = span.end_time ? new Date(span.end_time).getTime() : Date.now();
       
       return {
-        title: span.name,
-        data: [
-          {
-            x: startTime,
-            y: endTime - startTime,
-            status: span.status,
-            events: span.events,
-            error: span.error
-          }
-        ]
+        name: span.name,
+        duration: endTime - startTime,
+        status: span.status,
+        events: span.events,
+        error: span.error
       };
     });
   }, [spans]);
@@ -55,21 +50,45 @@ export const TracingView = React.memo(function TracingView({
     <div className={`tracing-view ${className}`}>
       <h3 className="text-lg font-semibold mb-4">Trace Timeline</h3>
       <div className="border rounded-lg p-4">
-        <Timeline
-          data={timelineData}
+        <BarChart
           width={800}
           height={spans.length * 40 + 40}
-          margin={{ left: 200, right: 20, top: 20, bottom: 20 }}
-          getColor={d => d.status === 'error' ? '#ef4444' : '#3b82f6'}
-          onValueClick={d => {
-            if (d.events?.length > 0) {
-              console.log('Span events:', d.events);
-            }
-            if (d.error) {
-              console.error('Span error:', d.error);
-            }
-          }}
-        />
+          data={timelineData}
+          layout="vertical"
+          margin={{ top: 20, right: 30, left: 200, bottom: 20 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis type="number" />
+          <YAxis dataKey="name" type="category" width={180} />
+          <Tooltip 
+            content={({ payload }) => {
+              if (!payload?.length) return null;
+              const data = payload[0].payload;
+              return (
+                <div className="bg-white p-2 border rounded shadow">
+                  <p><strong>{data.name}</strong></p>
+                  <p>Duration: {data.duration}ms</p>
+                  {data.error && <p className="text-red-500">Error: {data.error}</p>}
+                  {data.events?.length > 0 && (
+                    <p>Events: {data.events.length}</p>
+                  )}
+                </div>
+              );
+            }}
+          />
+          <Bar 
+            dataKey="duration" 
+            fill={(data) => data.status === 'error' ? '#ef4444' : '#3b82f6'}
+            onClick={(data) => {
+              if (data.events?.length > 0) {
+                console.log('Span events:', data.events);
+              }
+              if (data.error) {
+                console.error('Span error:', data.error);
+              }
+            }}
+          />
+        </BarChart>
       </div>
     </div>
   );
