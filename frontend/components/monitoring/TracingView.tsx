@@ -81,12 +81,13 @@ export const TracingView = React.memo(function TracingView({
             dataKey={(data) => data.status === 'error' ? 'duration' : undefined}
             name="Errors"
             fill="#ef4444"
-            onClick={(data) => {
-              if (data.events?.length > 0) {
-                console.log('Span events:', data.events);
+            onClick={(data: any) => {
+              const payload = data?.payload;
+              if (payload?.events?.length > 0) {
+                console.log('Span events:', payload.events);
               }
-              if (data.error) {
-                console.error('Span error:', data.error);
+              if (payload?.error) {
+                console.error('Span error:', payload.error);
               }
             }}
           />
@@ -94,9 +95,10 @@ export const TracingView = React.memo(function TracingView({
             dataKey={(data) => data.status !== 'error' ? 'duration' : undefined}
             name="Success"
             fill="#3b82f6"
-            onClick={(data) => {
-              if (data.events?.length > 0) {
-                console.log('Span events:', data.events);
+            onClick={(data: any) => {
+              const payload = data?.payload;
+              if (payload?.events?.length > 0) {
+                console.log('Span events:', payload.events);
               }
             }}
           />
