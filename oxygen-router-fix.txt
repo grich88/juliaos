@@ -1,0 +1,1 @@
+Fixed Oxygen.jl router registration for health endpoints
