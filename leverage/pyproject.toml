@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "enhanced_leverage_system"
+version = "3.2.0"
+authors = [
+  { name="AdeptDAO", email="info@adeptdao.com" },
+]
+description = "Enhanced Leverage System with Intelligent Induction"
+readme = "README_STANDALONE_LEVERAGE.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "dataclasses",
+    "typing-extensions",
+    "pathlib"
+]
