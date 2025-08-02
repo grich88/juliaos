@@ -76,17 +76,27 @@ export const TracingView = React.memo(function TracingView({
               );
             }}
           />
+          {/* Split into two bars - one for errors, one for success */}
           <Bar 
-            dataKey="duration" 
-            fill="#3b82f6"
-            fillOpacity={(data) => data.status === 'error' ? 1 : 0.8}
-            stroke={(data) => data.status === 'error' ? '#ef4444' : '#3b82f6'}
+            dataKey={(data) => data.status === 'error' ? 'duration' : undefined}
+            name="Errors"
+            fill="#ef4444"
             onClick={(data) => {
               if (data.events?.length > 0) {
                 console.log('Span events:', data.events);
               }
               if (data.error) {
                 console.error('Span error:', data.error);
+              }
+            }}
+          />
+          <Bar 
+            dataKey={(data) => data.status !== 'error' ? 'duration' : undefined}
+            name="Success"
+            fill="#3b82f6"
+            onClick={(data) => {
+              if (data.events?.length > 0) {
+                console.log('Span events:', data.events);
               }
             }}
           />
