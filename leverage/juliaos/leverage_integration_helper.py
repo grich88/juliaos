@@ -56,6 +56,28 @@ except ImportError:
     print("📁 Make sure universal_leverage_system_core.py is in the same directory")
     CORE_AVAILABLE = False
 
+class LeverageIntegration:
+    """Main integration class for the leverage system"""
+    def __init__(self):
+        self.system = UniversalLeverageSystem() if CORE_AVAILABLE else None
+        self.induction_available = INDUCTION_AVAILABLE
+        
+    def health_check(self, project_path="."):
+        """Run health check"""
+        return health_check(project_path)
+        
+    def scan_app(self, project_path="."):
+        """Scan application"""
+        return scan_my_app(project_path)
+        
+    def leverage_app(self, feature_name, project_path="."):
+        """Apply leverage to app"""
+        return leverage_my_app(feature_name, project_path)
+        
+    def run_induction(self, project_path="."):
+        """Run intelligent induction"""
+        return run_intelligent_induction(project_path)
+
 # Import the induction engine
 try:
     from leverage_induction import LeverageInductionEngine, run_intelligent_induction as _run_intelligent_induction
