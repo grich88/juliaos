@@ -78,7 +78,9 @@ export const TracingView = React.memo(function TracingView({
           />
           <Bar 
             dataKey="duration" 
-            fill={(data) => data.status === 'error' ? '#ef4444' : '#3b82f6'}
+            fill="#3b82f6"
+            fillOpacity={(data) => data.status === 'error' ? 1 : 0.8}
+            stroke={(data) => data.status === 'error' ? '#ef4444' : '#3b82f6'}
             onClick={(data) => {
               if (data.events?.length > 0) {
                 console.log('Span events:', data.events);

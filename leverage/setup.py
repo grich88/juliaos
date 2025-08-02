@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="enhanced_leverage_system",
+    name="juliaos",
     version="3.2.0",
     packages=find_packages(),
     install_requires=[
