@@ -8,16 +8,21 @@ WORKDIR /app/juliaos-core/julia
 COPY juliaos-core/julia/Project.toml .
 COPY juliaos-core/julia/Manifest.toml* .
 
-# Install Python and pip
-RUN apt-get update && apt-get install -y python3 python3-pip
+# Install Python dependencies
+RUN apt-get update && apt-get install -y python3 python3-pip python3-venv python3-full
+
+# Set up Python virtual environment
+ENV VIRTUAL_ENV=/app/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Copy Python package files first
 COPY leverage/setup.py /app/leverage/
 COPY leverage/pyproject.toml /app/leverage/
 COPY leverage/*.py /app/leverage/
 
-# Install Python package
-RUN cd /app/leverage && pip3 install -e .
+# Install Python package in virtual environment
+RUN cd /app/leverage && pip install -e .
 
 # Install Julia dependencies
 RUN julia --project=. -e 'using Pkg; Pkg.instantiate()'
