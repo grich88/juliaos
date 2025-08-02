@@ -38,7 +38,7 @@ try:
     INDUCTION_AVAILABLE = True
 except ImportError:
     INDUCTION_AVAILABLE = False
-    print("⚠️ Induction engine not available - using basic analysis")
+    print("[WARNING] Induction engine not available - using basic analysis")
 
 @dataclass
 class ServiceInfo:

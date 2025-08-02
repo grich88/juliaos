@@ -50,7 +50,7 @@ from typing import Dict, List, Any, Optional
 
 # Import the enhanced core system
 try:
-    from universal_leverage_system_core import UniversalLeverageSystem, ServiceInfo, LeverageAnalysis
+    from .universal_leverage_system_core import UniversalLeverageSystem, ServiceInfo, LeverageAnalysis
     CORE_AVAILABLE = True
 except ImportError:
     print("[WARNING] Enhanced Universal Leverage System core not found")
@@ -81,7 +81,7 @@ class LeverageIntegration:
 
 # Import the induction engine
 try:
-    from leverage_induction import LeverageInductionEngine, run_intelligent_induction as _run_intelligent_induction
+    from .leverage_induction import LeverageInductionEngine, run_intelligent_induction as _run_intelligent_induction
     INDUCTION_AVAILABLE = True
 except ImportError:
     print("[WARNING] Induction engine not available - basic analysis only")
