@@ -3,7 +3,7 @@
 """
 Core types and abstract types for the Agent system.
 """
-module Types
+module types
 
 # Abstract types
 abstract type AbstractLLMIntegration end

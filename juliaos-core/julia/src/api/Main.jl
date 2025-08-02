@@ -12,7 +12,7 @@
 include("../agents/Config.jl")
 
 # 2. Core Modules - Depend on Config
-include("../agents/Types.jl")         # No dependencies
+include("../agents/types.jl")         # No dependencies
 include("../agents/AgentTypes.jl")    # Depends on Types
 include("../agents/AgentMemory.jl")   # Depends on Types
 include("../agents/AgentQueue.jl")    # Depends on Types
@@ -36,7 +36,7 @@ include("MainServer.jl")       # Depends on api/Routes.jl, agents/Config.jl, and
 
 # 5. Export modules for other modules to use
 using .Config
-using .Types
+using .types
 using .AgentTypes
 using .AgentMemory
 using .AgentQueue
