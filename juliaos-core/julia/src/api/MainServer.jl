@@ -3,12 +3,14 @@ module MainServer
 using Oxygen
 using HTTP
 using ..Routes
-using ..WebSockets.AlertsWebSocket
+# WebSocket modules loaded conditionally to avoid hanging
+# using ..WebSockets.AlertsWebSocket
 using JSON3
 using Dates
 using LRUCache: LRU
 using Base.Threads: SpinLock, @spawn, @threads
-using ..LeverageSystem # Use LeverageSystem module
+# LeverageSystem loaded lazily to avoid PyCall hanging
+# using ..LeverageSystem # Use LeverageSystem module
 
 # Constants
 const CORS_HEADERS = Dict{String,String}(
@@ -179,9 +181,9 @@ function start_server(;
                         return response
                     end
                     
-                    # Add Leverage context to request
+                    # Add basic context to request (LeverageSystem loaded lazily)
                     req.context = Dict{Symbol,Any}(
-                        :leverage_context => LeverageSystem.get_context(),
+                        :leverage_context => nothing, # Loaded on demand
                         :cors_headers => CORS_HEADERS
                     )
                     
@@ -197,9 +199,10 @@ function start_server(;
                         end
                     end
                     
-                    # Clean up Leverage context
-                    if haskey(req.context, :leverage_context)
-                        LeverageSystem.cleanup_context(req.context[:leverage_context])
+                    # Clean up Leverage context (if loaded)
+                    if haskey(req.context, :leverage_context) && req.context[:leverage_context] !== nothing
+                        # LeverageSystem.cleanup_context(req.context[:leverage_context])
+                        # Skip cleanup for now - loaded lazily
                     end
                     
                     return res
@@ -228,12 +231,12 @@ function start_server(;
         @error "Failed to start server" exception=e
         rethrow(e)
     finally
-        # Clean up Leverage system
+        # Clean up Leverage system (if loaded)
         try
-            @info "Cleaning up Leverage system..."
-            LeverageSystem.cleanup()
+            @info "Skipping Leverage system cleanup - loaded lazily"
+            # LeverageSystem.cleanup()
         catch cleanup_err
-            @error "Error during Leverage system cleanup" exception=cleanup_err
+            @error "Error during cleanup" exception=cleanup_err
         end
     end
 end

@@ -22,13 +22,7 @@ try
     include("../agents/AgentCore.jl")     # Depends on Types, AgentTypes, AgentMemory, AgentQueue, LLMIntegration
     include("../agents/AgentMetrics.jl")  # Depends on Config, AgentCore
 
-    # 3. Essential modules for server functionality
-    include("../leverage/LeverageSystem.jl") # Load Leverage system
-    include("../agents/Monitoring.jl")      # No dependencies
-    include("../agents/Persistence.jl")     # Depends on Config, AgentMetrics
-    include("../agents/Agents.jl")          # Depends on Config, AgentMetrics, LLMIntegration, Persistence
-    
-    # 4. Make modules available
+    # 3. Make core modules available (minimal set)
     using .Config
     using .types
     using .AgentTypes
@@ -37,10 +31,6 @@ try
     using .LLMIntegration
     using .AgentCore
     using .AgentMetrics
-    using .LeverageSystem
-    using .Monitoring
-    using .Persistence
-    using .Agents
     
     @info "JuliaOSFramework: Agent modules included and using'd successfully."
 catch e
@@ -48,59 +38,49 @@ catch e
 end
 
 # Lazy loading functions for heavy modules
-function load_full_agents()
+function load_heavy_modules()
     @eval begin
-        include("../agents/AgentTypes.jl")    
-        include("../agents/AgentMemory.jl")   
-        include("../agents/AgentQueue.jl")    
-        include("../agents/LLMIntegration.jl")
-        include("../agents/AgentCore.jl")     
-        include("../agents/AgentMetrics.jl")  
+        # Load potentially hanging modules only when needed
+        include("../leverage/LeverageSystem.jl") # PyCall can hang
         include("../agents/Monitoring.jl")      
         include("../agents/Persistence.jl")     
-        include("../agents/Agents.jl")
-    include("../agents/AgentMonitor.jl")    # Depends on Config, AgentMetrics, Agents
-
-    # 4. Advanced Agent Modules - Depend on Agents
-    include("../agents/AgentLoop.jl")
-    include("../agents/AgentLifecycle.jl")
-    include("../agents/AgentTasks.jl")
-    include("../agents/PlanAndExecute.jl")
-    
-    # Make Agent modules available in the same order as includes
-    using .Config
-    using .types
-    using .AgentTypes
-    using .AgentMemory
-    using .AgentQueue
-    using .LLMIntegration
-    using .AgentCore
-    using .AgentMetrics
-    using .LeverageSystem
-    using .Monitoring
-    using .Persistence
-    using .Agents
-    using .AgentMonitor
-    using .AgentLoop
-    using .AgentLifecycle
-    using .AgentTasks
-    using .PlanAndExecute
-    @info "JuliaOSFramework: Agent modules included and using'd successfully."
+        include("../agents/Agents.jl")          
+        include("../agents/AgentMonitor.jl")    
+        include("../agents/AgentLoop.jl")
+        include("../agents/AgentLifecycle.jl")
+        include("../agents/AgentTasks.jl")
+        include("../agents/PlanAndExecute.jl")
+        
+        # Make heavy modules available
+        using .LeverageSystem
+        using .Monitoring
+        using .Persistence
+        using .Agents
+        using .AgentMonitor
+        using .AgentLoop
+        using .AgentLifecycle
+        using .AgentTasks
+        using .PlanAndExecute
+        
+        @info "JuliaOSFramework: Heavy modules loaded successfully."
+    end
 catch e
-    @error "JuliaOSFramework: Critical error including Agent modules." exception=(e, catch_backtrace())
+    @error "JuliaOSFramework: Error loading heavy modules." exception=(e, catch_backtrace())
 end
 
-# --- Include Core Swarm Modules ---
-try
-    include("../swarm/SwarmBase.jl")
-    include("../swarm/Swarms.jl")
+# Lazy loading function for Swarm modules (also heavy)
+function load_swarm_modules()
+    @eval begin
+        include("../swarm/SwarmBase.jl")
+        include("../swarm/Swarms.jl")
 
-    # Make Swarm modules available
-    using .SwarmBase
-    using .Swarms
-    @info "JuliaOSFramework: Swarm modules included and using'd successfully."
+        # Make Swarm modules available
+        using .SwarmBase
+        using .Swarms
+        @info "JuliaOSFramework: Swarm modules included and using'd successfully."
+    end
 catch e
-    @error "JuliaOSFramework: Critical error including Swarm modules." exception=(e, catch_backtrace())
+    @error "JuliaOSFramework: Error loading Swarm modules." exception=(e, catch_backtrace())
 end
 
 """
