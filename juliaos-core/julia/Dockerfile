@@ -17,12 +17,14 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Copy Python package files first
-COPY leverage/setup.py /app/leverage/
-COPY leverage/pyproject.toml /app/leverage/
-COPY leverage/*.py /app/leverage/
+COPY leverage /app/leverage/
 
 # Install Python package in virtual environment
 RUN cd /app/leverage && pip install -e .
+
+# Configure PyCall to use our virtual environment Python
+ENV PYTHON=/app/venv/bin/python3
+RUN julia -e 'using Pkg; Pkg.add("PyCall"); Pkg.build("PyCall")'
 
 # Install Julia dependencies
 RUN julia --project=. -e 'using Pkg; Pkg.instantiate()'

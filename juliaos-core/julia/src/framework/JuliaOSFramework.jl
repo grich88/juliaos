@@ -15,7 +15,7 @@ try
     include("../agents/Config.jl")
 
     # 2. Core Modules - Depend on Config
-    include("../agents/Types.jl")         # No dependencies
+    include("../agents/types.jl")         # No dependencies
     include("../agents/AgentTypes.jl")    # Depends on Types
     include("../agents/AgentMemory.jl")   # Depends on Types
     include("../agents/AgentQueue.jl")    # Depends on Types

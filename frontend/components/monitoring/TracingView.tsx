@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Timeline } from 'react-vis';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 interface TraceEvent {
   name: string;
