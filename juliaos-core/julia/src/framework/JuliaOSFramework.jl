@@ -38,7 +38,7 @@ try
     
     # Make Agent modules available in the same order as includes
     using .Config
-    using .Types
+    using .types
     using .AgentTypes
     using .AgentMemory
     using .AgentQueue

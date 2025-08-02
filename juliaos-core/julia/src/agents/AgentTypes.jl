@@ -8,7 +8,7 @@ module AgentTypes
 using DataStructures
 using Dates
 using Base.Threads: ReentrantLock
-using ..Types: AbstractLLMIntegration, AbstractAgentMemory, AbstractAgentQueue
+using ..types: AbstractLLMIntegration, AbstractAgentMemory, AbstractAgentQueue
 
 # Agent Configuration
 struct AgentConfig

@@ -2,7 +2,7 @@ module Agents
 
 # Include core types first
 include("types.jl")
-using .Types
+using .types
 
 # Include all agent-related modules in the correct order
 include("AgentTypes.jl")
