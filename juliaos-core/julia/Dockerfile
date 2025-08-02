@@ -8,7 +8,18 @@ WORKDIR /app/juliaos-core/julia
 COPY juliaos-core/julia/Project.toml .
 COPY juliaos-core/julia/Manifest.toml* .
 
-# Install dependencies
+# Install Python and pip
+RUN apt-get update && apt-get install -y python3 python3-pip
+
+# Copy Python package files first
+COPY leverage/setup.py /app/leverage/
+COPY leverage/pyproject.toml /app/leverage/
+COPY leverage/*.py /app/leverage/
+
+# Install Python package
+RUN cd /app/leverage && pip3 install -e .
+
+# Install Julia dependencies
 RUN julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
 # Copy the rest of the application
