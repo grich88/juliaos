@@ -114,7 +114,7 @@ class UniversalLeverageSystem:
             r'(\w+)\s*=>\s*{',
         ]
         
-        print(f"[LEVERAGE] Universal Leverage System v{self.version} ready for seamless integration")
+        # System ready - initialization message will be shown when first used
 
     def run_intelligent_analysis(self, project_path: str = ".") -> Dict[str, Any]:
         """

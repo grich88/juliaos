@@ -111,12 +111,16 @@ def print_system_status():
     print(f"   Induction Engine: {'✅ Available' if info['induction_available'] else '❌ Not Available'}")
     print(f"   Version: {info['version']}")
 
-# Initialize the system
-if CORE_AVAILABLE:
-    _leverage_system = UniversalLeverageSystem()
-    print("[LEVERAGE] Universal Leverage System ready for seamless integration")
-else:
-    _leverage_system = None
+# Initialize the system lazily - only when needed
+_leverage_system = None
+
+def _get_leverage_system():
+    """Get or initialize the leverage system lazily"""
+    global _leverage_system
+    if _leverage_system is None and CORE_AVAILABLE:
+        _leverage_system = UniversalLeverageSystem()
+        print("[LEVERAGE] Universal Leverage System initialized")
+    return _leverage_system
 
 # =============================================================================
 # 🎯 NEW: INTELLIGENT INDUCTION FUNCTIONS
@@ -278,7 +282,14 @@ def health_check(project_path: str = ".") -> Dict[str, Any]:
         }
     
     try:
-        result = _leverage_system.health_check(project_path)
+        system = _get_leverage_system()
+        if system is None:
+            return {
+                'status': 'system_unavailable',
+                'error': 'Core leverage system not available',
+                'recommendations': ['Install universal_leverage_system_core.py']
+            }
+        result = system.health_check(project_path)
         
         # Add induction recommendations if available
         if INDUCTION_AVAILABLE:
@@ -318,7 +329,14 @@ def scan_my_app(project_path: str = ".") -> Dict[str, Any]:
         }
     
     try:
-        result = _leverage_system.scan_my_app(project_path)
+        system = _get_leverage_system()
+        if system is None:
+            return {
+                'error': 'Core system not available',
+                'services': [],
+                'ready': False
+            }
+        result = system.scan_my_app(project_path)
         
         # Enhance with induction insights if available
         if INDUCTION_AVAILABLE and not result.get('error'):
@@ -367,8 +385,14 @@ def leverage_my_app(feature_name: str, project_path: str = ".") -> Dict[str, Any
         }
     
     try:
+        system = _get_leverage_system()
+        if system is None:
+            return {
+                'error': 'Core system not available',
+                'exponential_value': 1.0
+            }
         # Get enhanced leverage results
-        result = _leverage_system.leverage_my_app(feature_name, project_path)
+        result = system.leverage_my_app(feature_name, project_path)
         
         # Add induction context if available
         if INDUCTION_AVAILABLE:
@@ -411,7 +435,13 @@ def auto_leverage_everything(project_path: str = ".") -> Dict[str, Any]:
         }
     
     try:
-        return _leverage_system.auto_leverage_everything(project_path)
+        system = _get_leverage_system()
+        if system is None:
+            return {
+                'error': 'Core system not available',
+                'opportunities_found': 0
+            }
+        return system.auto_leverage_everything(project_path)
     except Exception as e:
         return {
             'error': str(e),
@@ -439,7 +469,10 @@ def run_intelligent_analysis(project_path: str = ".") -> Dict[str, Any]:
         return {'error': 'Core system not available'}
     
     try:
-        return _leverage_system.run_intelligent_analysis(project_path)
+        system = _get_leverage_system()
+        if system is None:
+            return {'error': 'Core system not available'}
+        return system.run_intelligent_analysis(project_path)
     except Exception as e:
         return {'error': str(e)}
 

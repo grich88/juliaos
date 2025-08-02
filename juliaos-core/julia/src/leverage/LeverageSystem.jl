@@ -14,7 +14,21 @@ using PyCall
 const leverage = PyNULL()
 
 function __init__()
-    copy!(leverage, pyimport("juliaos.leverage"))
+    # Delay Python import for faster startup
+    # The leverage module will be imported on first use
+end
+
+function _get_leverage_module()
+    if PyCall.PyNULL() == leverage
+        try
+            copy!(leverage, pyimport("juliaos.leverage"))
+            @info "[LEVERAGE] Python module imported successfully"
+        catch e
+            @error "[LEVERAGE] Failed to import Python module: $e"
+            rethrow(e)
+        end
+    end
+    return leverage
 end
 
 """
@@ -24,7 +38,7 @@ Run complete intelligent induction process on the project.
 Analyzes codebase and generates optimization strategy.
 """
 function run_intelligent_induction(project_path::String=".")
-    return leverage.run_intelligent_induction(project_path)
+    return _get_leverage_module().run_intelligent_induction(project_path)
 end
 
 """
@@ -34,7 +48,7 @@ Run quick automated analysis without developer consultation.
 Good for CI/CD pipelines or automated checks.
 """
 function quick_induction_analysis(project_path::String=".")
-    return leverage.quick_induction_analysis(project_path)
+    return _get_leverage_module().quick_induction_analysis(project_path)
 end
 
 """
@@ -43,7 +57,7 @@ end
 Get quick actionable recommendations based on project analysis.
 """
 function get_induction_recommendations(project_path::String=".")
-    return leverage.get_induction_recommendations(project_path)
+    return _get_leverage_module().get_induction_recommendations(project_path)
 end
 
 """
@@ -52,7 +66,7 @@ end
 Check system health and readiness for leverage operations.
 """
 function health_check(project_path::String=".")
-    return leverage.health_check(project_path)
+    return _get_leverage_module().health_check(project_path)
 end
 
 """
@@ -61,7 +75,7 @@ end
 Scan application for services and leverage opportunities.
 """
 function scan_my_app(project_path::String=".")
-    return leverage.scan_my_app(project_path)
+    return _get_leverage_module().scan_my_app(project_path)
 end
 
 """
@@ -70,7 +84,7 @@ end
 Apply leverage to a specific feature with intelligent targeting.
 """
 function leverage_my_app(feature_name::String, project_path::String=".")
-    return leverage.leverage_my_app(feature_name, project_path)
+    return _get_leverage_module().leverage_my_app(feature_name, project_path)
 end
 
 """
@@ -79,7 +93,7 @@ end
 Automatically discover and leverage all opportunities.
 """
 function auto_leverage_everything(project_path::String=".")
-    return leverage.auto_leverage_everything(project_path)
+    return _get_leverage_module().auto_leverage_everything(project_path)
 end
 
 """
@@ -88,7 +102,7 @@ end
 Generate comprehensive leverage report with analysis and recommendations.
 """
 function generate_leverage_report(project_path::String=".")
-    return leverage.generate_leverage_report(project_path)
+    return _get_leverage_module().generate_leverage_report(project_path)
 end
 
 # Context management
@@ -110,16 +124,22 @@ Initialize the Leverage system and prepare it for use.
 """
 function initialize(project_path::String=".")
     if !GLOBAL_CONTEXT.initialized
-        # Run health check
-        GLOBAL_CONTEXT.health_status = health_check(project_path)
+        @info "[LEVERAGE] Initializing Leverage system..."
         
-        # Store project path
+        # Store project path first
         GLOBAL_CONTEXT.project_path = project_path
         
-        # Mark as initialized
+        # Mark as initialized to prevent recursion
         GLOBAL_CONTEXT.initialized = true
         
-        @info "[LEVERAGE] 🚀 Universal Leverage System initialized"
+        # Run health check (this may take time, so do it after marking initialized)
+        try
+            GLOBAL_CONTEXT.health_status = health_check(project_path)
+            @info "[LEVERAGE] Universal Leverage System initialized successfully"
+        catch e
+            @warn "[LEVERAGE] Health check failed during initialization: $e"
+            GLOBAL_CONTEXT.health_status = Dict("status" => "error", "error" => string(e))
+        end
     end
     nothing
 end

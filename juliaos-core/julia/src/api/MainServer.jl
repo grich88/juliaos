@@ -140,9 +140,9 @@ function start_server(;
     default_port::Int=8080,
     ws_port::Int=8081
 )
-    # Initialize Leverage system
-    @info "Initializing Leverage system..."
-    LeverageSystem.initialize()
+    # Skip leverage initialization at startup for faster boot time
+    # The leverage system will be initialized on first use
+    @info "Leverage system will be initialized on first use"
     
     # Get host and port from environment or use defaults
     api_host = get(ENV, "API_HOST", default_host)
