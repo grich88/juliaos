@@ -1,12 +1,18 @@
 module JuliaOS
 
-# Import core modules
-include("agents/mod.jl")
-include("leverage/LeverageSystem.jl")
-
-# Export public modules and functions
+# Fast minimal startup - delay heavy imports
 export initialize, initialize_framework
-export Agents, LeverageSystem
+
+# Lazy module loading for faster startup
+function load_agents()
+    @eval include("agents/mod.jl")
+    return Agents
+end
+
+function load_leverage()
+    @eval include("leverage/LeverageSystem.jl") 
+    return LeverageSystem
+end
 
 # Constants for feature detection
 const PYTHON_WRAPPER_EXISTS = isfile(joinpath(@__DIR__, "python/python_bridge.jl"))

@@ -1,0 +1,1 @@
+Health endpoints now use router pattern matching working test routes

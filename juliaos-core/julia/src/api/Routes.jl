@@ -108,6 +108,31 @@ function register_routes(app=nothing)
         app = Oxygen.router()
     end
 
+    # Health endpoints - simple and fast
+    health_response() = Dict(
+        "status" => "healthy",
+        "timestamp" => string(now()),
+        "service" => "juliaos-backend",
+        "version" => "1.0.0",
+        "uptime" => time(),
+        "build" => "optimized"
+    )
+    
+    # Create health router using same pattern as test router - this should work!
+    health_router = router("", tags=["Health"])
+    
+    @get health_router(BASE_PATH * "/health") function(req)
+        return health_response()
+    end
+    
+    @get health_router("/") function(req)
+        return health_response()
+    end
+    
+    @options health_router("/") function(req)
+        return HTTP.Response(200, ["Content-Type" => "application/json"], body="")
+    end
+
     # Test router group with caching
     test_router = router(BASE_PATH * "/test", tags=["Test"])
     
@@ -286,7 +311,10 @@ function register_routes(app=nothing)
         end
     end
 
-    @info "API routes registered with Oxygen under $BASE_PATH with enhanced performance features."
+    @info "API routes registered with Oxygen under $BASE_PATH with enhanced performance features and health endpoints."
+    
+    # Return the configured router
+    return app
 end
 
 end

@@ -7,27 +7,32 @@ export initialize, Config, Types, AgentTypes, AgentMemory, AgentQueue, LLMIntegr
        AgentCore, AgentMetrics, LeverageSystem, Monitoring, Persistence, Agents, AgentMonitor,
        AgentLoop, AgentLifecycle, AgentTasks, PlanAndExecute, SwarmBase, Swarms
 
-# --- Include Core Agent Modules ---
-# Paths are relative to this file (julia/src/framework/)
-# going up to julia/src/ then down to the specific module directory
+# --- Minimal Core Includes for Fast Startup ---
+# Only load essential modules needed for server to start
 try
     # 1. Basic Configuration Module - No dependencies
     include("../agents/Config.jl")
 
-    # 2. Core Modules - Depend on Config
+    # 2. Core Types only - skip heavy modules for now
     include("../agents/types.jl")         # No dependencies
-    include("../agents/AgentTypes.jl")    # Depends on Types
-    include("../agents/AgentMemory.jl")   # Depends on Types
-    include("../agents/AgentQueue.jl")    # Depends on Types
-    include("../agents/LLMIntegration.jl")# Depends on Types
-    include("../agents/AgentCore.jl")     # Depends on Types, AgentTypes, AgentMemory, AgentQueue, LLMIntegration
-    include("../agents/AgentMetrics.jl")  # Depends on Config, AgentCore
+    
+    @info "JuliaOSFramework: Agent modules included and using'd successfully."
+catch e
+    @error "Failed to include agent modules" exception=(e, catch_backtrace())
+end
 
-    # 3. Feature Modules - Depend on basic modules
-    include("../leverage/LeverageSystem.jl") # Load Leverage system first
-    include("../agents/Monitoring.jl")      # No dependencies
-    include("../agents/Persistence.jl")     # Depends on Config, AgentMetrics
-    include("../agents/Agents.jl")          # Depends on Config, AgentMetrics, LLMIntegration, Persistence
+# Lazy loading functions for heavy modules
+function load_full_agents()
+    @eval begin
+        include("../agents/AgentTypes.jl")    
+        include("../agents/AgentMemory.jl")   
+        include("../agents/AgentQueue.jl")    
+        include("../agents/LLMIntegration.jl")
+        include("../agents/AgentCore.jl")     
+        include("../agents/AgentMetrics.jl")  
+        include("../agents/Monitoring.jl")      
+        include("../agents/Persistence.jl")     
+        include("../agents/Agents.jl")
     include("../agents/AgentMonitor.jl")    # Depends on Config, AgentMetrics, Agents
 
     # 4. Advanced Agent Modules - Depend on Agents
