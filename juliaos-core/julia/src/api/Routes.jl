@@ -118,18 +118,22 @@ function register_routes(app=nothing)
         "build" => "optimized"
     )
     
-    # Create health router using same pattern as test router - this should work!
-    health_router = router("", tags=["Health"])
-    
-    @get health_router(BASE_PATH * "/health") function(req)
+    # Add health endpoints directly to main app router
+    @get app BASE_PATH * "/health" function(req)
         return health_response()
     end
     
-    @get health_router("/") function(req)
+    # Also add root health endpoint
+    @get app "/" function(req)
         return health_response()
     end
     
-    @options health_router("/") function(req)
+    @options app "/" function(req)
+        return HTTP.Response(200, ["Content-Type" => "application/json"], body="")
+    end
+    
+    # Add HEAD support for health checks
+    @route app "HEAD" "/" function(req)
         return HTTP.Response(200, ["Content-Type" => "application/json"], body="")
     end
 
