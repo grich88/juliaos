@@ -7,14 +7,40 @@ export initialize, Config, Types, AgentTypes, AgentMemory, AgentQueue, LLMIntegr
        AgentCore, AgentMetrics, LeverageSystem, Monitoring, Persistence, Agents, AgentMonitor,
        AgentLoop, AgentLifecycle, AgentTasks, PlanAndExecute, SwarmBase, Swarms
 
-# --- Minimal Core Includes for Fast Startup ---
-# Only load essential modules needed for server to start
+# --- Core Includes for Server Startup ---
+# Load essential modules needed for server to start properly
 try
     # 1. Basic Configuration Module - No dependencies
     include("../agents/Config.jl")
 
-    # 2. Core Types only - skip heavy modules for now
+    # 2. Core Modules - Essential for server
     include("../agents/types.jl")         # No dependencies
+    include("../agents/AgentTypes.jl")    # Depends on Types
+    include("../agents/AgentMemory.jl")   # Depends on Types
+    include("../agents/AgentQueue.jl")    # Depends on Types
+    include("../agents/LLMIntegration.jl")# Depends on Types
+    include("../agents/AgentCore.jl")     # Depends on Types, AgentTypes, AgentMemory, AgentQueue, LLMIntegration
+    include("../agents/AgentMetrics.jl")  # Depends on Config, AgentCore
+
+    # 3. Essential modules for server functionality
+    include("../leverage/LeverageSystem.jl") # Load Leverage system
+    include("../agents/Monitoring.jl")      # No dependencies
+    include("../agents/Persistence.jl")     # Depends on Config, AgentMetrics
+    include("../agents/Agents.jl")          # Depends on Config, AgentMetrics, LLMIntegration, Persistence
+    
+    # 4. Make modules available
+    using .Config
+    using .types
+    using .AgentTypes
+    using .AgentMemory
+    using .AgentQueue
+    using .LLMIntegration
+    using .AgentCore
+    using .AgentMetrics
+    using .LeverageSystem
+    using .Monitoring
+    using .Persistence
+    using .Agents
     
     @info "JuliaOSFramework: Agent modules included and using'd successfully."
 catch e
