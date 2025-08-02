@@ -1,0 +1,105 @@
+# Alert system configuration
+
+[general]
+enabled = true
+history_size = 1000  # Maximum number of historical alerts to keep
+
+[thresholds]
+memory_warning = 800    # MB
+memory_critical = 1000  # MB
+error_rate_warning = 0.05   # 5%
+error_rate_critical = 0.10  # 10%
+queue_size_warning = 100
+queue_size_critical = 500
+idle_time_warning = 300     # seconds
+idle_time_critical = 600    # seconds
+
+[channels.slack]
+enabled = true
+webhook_url = "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+channel = "#monitoring"
+username = "JuliaOS Monitor"
+
+[channels.email]
+enabled = true
+smtp_server = "smtp.example.com"
+smtp_port = 587
+username = "monitor@example.com"
+password = "${SMTP_PASSWORD}"  # Use environment variable
+from_address = "monitor@example.com"
+to_addresses = [
+    "team@example.com",
+    "oncall@example.com"
+]
+
+[channels.discord]
+enabled = true
+webhook_url = "https://discord.com/api/webhooks/YOUR/WEBHOOK/URL"
+username = "JuliaOS Monitor"
+
+[rules.memory_usage]
+enabled = true
+name = "High Memory Usage"
+description = "Alerts when agent memory usage exceeds threshold"
+severity = "WARNING"
+interval = 300  # seconds
+channels = ["slack", "email"]
+
+[rules.error_rate]
+enabled = true
+name = "High Error Rate"
+description = "Alerts when agent error rate exceeds threshold"
+severity = "ERROR"
+interval = 60  # seconds
+channels = ["slack", "discord"]
+
+[rules.health_status]
+enabled = true
+name = "Unhealthy Agent"
+description = "Alerts when agent health status degrades"
+severity = "CRITICAL"
+interval = 30  # seconds
+channels = ["slack", "email", "discord"]
+
+[rules.queue_size]
+enabled = true
+name = "Large Queue Size"
+description = "Alerts when agent task queue grows too large"
+severity = "WARNING"
+interval = 60  # seconds
+channels = ["slack"]
+
+[rules.idle_time]
+enabled = true
+name = "Agent Idle"
+description = "Alerts when agent is idle for too long"
+severity = "WARNING"
+interval = 300  # seconds
+channels = ["slack"]
+
+[templates.slack]
+warning = ":warning: *{severity} Alert*\nAgent: {agent_id}\nMessage: {message}\nTime: {timestamp}\nDetails: {details}"
+error = ":rotating_light: *{severity} Alert*\nAgent: {agent_id}\nMessage: {message}\nTime: {timestamp}\nDetails: {details}"
+critical = ":sos: *{severity} Alert*\nAgent: {agent_id}\nMessage: {message}\nTime: {timestamp}\nDetails: {details}"
+
+[templates.email]
+subject = "[{severity}] JuliaOS Alert - {message}"
+body = """
+Alert Details:
+-------------
+Severity: {severity}
+Agent: {agent_id}
+Message: {message}
+Time: {timestamp}
+
+Additional Details:
+{details}
+
+--
+JuliaOS Monitoring System
+"""
+
+[templates.discord]
+warning = "⚠️ **{severity} Alert**\n**Agent:** {agent_id}\n**Message:** {message}\n**Time:** {timestamp}\n**Details:**\n```json\n{details}\n```"
+error = "🚨 **{severity} Alert**\n**Agent:** {agent_id}\n**Message:** {message}\n**Time:** {timestamp}\n**Details:**\n```json\n{details}\n```"
+critical = "🆘 **{severity} Alert**\n**Agent:** {agent_id}\n**Message:** {message}\n**Time:** {timestamp}\n**Details:**\n```json\n{details}\n```"
