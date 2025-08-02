@@ -1,0 +1,29 @@
+services:
+  # Backend service
+  - type: web
+    name: juliaos-backend
+    env: docker
+    dockerfilePath: ./juliaos-core/julia/Dockerfile
+    envVars:
+      - key: JULIA_NUM_THREADS
+        value: "3,1"
+      - key: PORT
+        value: "8080"
+      - key: HOST
+        value: "0.0.0.0"
+    healthCheckPath: /api/v1/health
+    
+  # Frontend service
+  - type: web
+    name: juliaos-frontend
+    env: node
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          name: juliaos-backend
+          type: web
+          property: host
+      - key: NODE_ENV
+        value: production
