@@ -8,7 +8,7 @@ module AgentCore
 using Base.Threads
 using Dates
 using UUIDs
-using ..Types: AbstractLLMIntegration, AbstractAgentMemory, AbstractAgentQueue
+using ..types: AbstractLLMIntegration, AbstractAgentMemory, AbstractAgentQueue
 using ..AgentTypes
 using ..AgentMemory
 using ..AgentQueue

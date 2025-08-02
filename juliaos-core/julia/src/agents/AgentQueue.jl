@@ -5,7 +5,7 @@ Queue management for Agents.
 """
 module AgentQueue
 
-using ..Types: AbstractAgentQueue
+using ..types: AbstractAgentQueue
 
 # Queue implementations
 struct SimpleQueue <: AbstractAgentQueue

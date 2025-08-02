@@ -5,7 +5,7 @@ Memory management for Agents.
 """
 module AgentMemory
 
-using ..Types: AbstractAgentMemory
+using ..types: AbstractAgentMemory
 
 # Memory implementations
 struct SimpleMemory <: AbstractAgentMemory

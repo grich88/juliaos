@@ -13,7 +13,7 @@ using JSON3 # Needed for parsing/serializing provider-specific configs and reque
 using HTTP  # For making direct HTTP calls
 
 # Import the abstract type from Types module
-using ..Types: AbstractLLMIntegration
+using ..types: AbstractLLMIntegration
 
 export chat, chat_stream, get_provider_status # Export the new status function
 

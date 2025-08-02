@@ -20,7 +20,7 @@ using JSON3
 # ----------------------------------------------------------------------
 using ..Config
 using ..AgentTypes: Agent, TaskResult, TASK_COMPLETED, TASK_FAILED, TASK_RUNNING
-using ..Types: AbstractLLMIntegration
+using ..types: AbstractLLMIntegration
 using ..LLMIntegration
 
 # ----------------------------------------------------------------------
