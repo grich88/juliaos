@@ -114,7 +114,7 @@ def print_system_status():
 # Initialize the system
 if CORE_AVAILABLE:
     _leverage_system = UniversalLeverageSystem()
-    print("[LEVERAGE] 🚀 Universal Leverage System ready for seamless integration")
+    print("[LEVERAGE] Universal Leverage System ready for seamless integration")
 else:
     _leverage_system = None
 
