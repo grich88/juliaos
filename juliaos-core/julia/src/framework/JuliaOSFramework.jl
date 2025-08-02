@@ -39,48 +39,52 @@ end
 
 # Lazy loading functions for heavy modules
 function load_heavy_modules()
-    @eval begin
-        # Load potentially hanging modules only when needed
-        include("../leverage/LeverageSystem.jl") # PyCall can hang
-        include("../agents/Monitoring.jl")      
-        include("../agents/Persistence.jl")     
-        include("../agents/Agents.jl")          
-        include("../agents/AgentMonitor.jl")    
-        include("../agents/AgentLoop.jl")
-        include("../agents/AgentLifecycle.jl")
-        include("../agents/AgentTasks.jl")
-        include("../agents/PlanAndExecute.jl")
-        
-        # Make heavy modules available
-        using .LeverageSystem
-        using .Monitoring
-        using .Persistence
-        using .Agents
-        using .AgentMonitor
-        using .AgentLoop
-        using .AgentLifecycle
-        using .AgentTasks
-        using .PlanAndExecute
-        
-        @info "JuliaOSFramework: Heavy modules loaded successfully."
+    try
+        @eval begin
+            # Load potentially hanging modules only when needed
+            include("../leverage/LeverageSystem.jl") # PyCall can hang
+            include("../agents/Monitoring.jl")      
+            include("../agents/Persistence.jl")     
+            include("../agents/Agents.jl")          
+            include("../agents/AgentMonitor.jl")    
+            include("../agents/AgentLoop.jl")
+            include("../agents/AgentLifecycle.jl")
+            include("../agents/AgentTasks.jl")
+            include("../agents/PlanAndExecute.jl")
+            
+            # Make heavy modules available
+            using .LeverageSystem
+            using .Monitoring
+            using .Persistence
+            using .Agents
+            using .AgentMonitor
+            using .AgentLoop
+            using .AgentLifecycle
+            using .AgentTasks
+            using .PlanAndExecute
+            
+            @info "JuliaOSFramework: Heavy modules loaded successfully."
+        end
+    catch e
+        @error "JuliaOSFramework: Error loading heavy modules." exception=(e, catch_backtrace())
     end
-catch e
-    @error "JuliaOSFramework: Error loading heavy modules." exception=(e, catch_backtrace())
 end
 
 # Lazy loading function for Swarm modules (also heavy)
 function load_swarm_modules()
-    @eval begin
-        include("../swarm/SwarmBase.jl")
-        include("../swarm/Swarms.jl")
+    try
+        @eval begin
+            include("../swarm/SwarmBase.jl")
+            include("../swarm/Swarms.jl")
 
-        # Make Swarm modules available
-        using .SwarmBase
-        using .Swarms
-        @info "JuliaOSFramework: Swarm modules included and using'd successfully."
+            # Make Swarm modules available
+            using .SwarmBase
+            using .Swarms
+            @info "JuliaOSFramework: Swarm modules included and using'd successfully."
+        end
+    catch e
+        @error "JuliaOSFramework: Error loading Swarm modules." exception=(e, catch_backtrace())
     end
-catch e
-    @error "JuliaOSFramework: Error loading Swarm modules." exception=(e, catch_backtrace())
 end
 
 """
