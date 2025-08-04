@@ -374,8 +374,25 @@ function register_routes(app=nothing)
         return add_cors_headers(response_data)
     end
 
-    # Note: OPTIONS handlers removed - CORS handled by middleware in MainServer.jl
-    # The before_request middleware in MainServer.jl handles all OPTIONS preflight requests
+    # Add a catch-all OPTIONS handler to ensure all preflight requests are handled
+    # This is needed because the middleware might not catch OPTIONS for parameterized routes
+    try
+        # Use HTTP.Router to add a catch-all OPTIONS handler
+        HTTP.register!(app.router, "OPTIONS", "*", (req) -> begin
+            headers = [
+                "Content-Type" => "application/json",
+                "Access-Control-Allow-Origin" => "*", 
+                "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
+                "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
+                "Access-Control-Max-Age" => "86400"
+            ]
+            return HTTP.Response(200, headers, "")
+        end)
+        @info "Catch-all OPTIONS handler registered successfully"
+    catch e
+        @warn "Could not register catch-all OPTIONS handler: $e"
+        # Fall back to middleware handling
+    end
 
     # All routes are already registered directly on the main app
     # No mounting needed - Oxygen routes are already part of the main app context
