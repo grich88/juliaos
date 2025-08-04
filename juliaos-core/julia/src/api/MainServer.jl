@@ -171,10 +171,7 @@ function start_server(;
             port=api_port,
             before_request=[
                 req -> begin
-                    # AGGRESSIVE OPTIONS handling - catch ALL OPTIONS requests
                     if uppercase(string(req.method)) == "OPTIONS"
-                        @info "Handling OPTIONS request for: $(req.target)"
-                        # Add CORS headers to response
                         headers = [
                             "Content-Type" => "application/json",
                             "Access-Control-Allow-Origin" => "*",
@@ -184,13 +181,10 @@ function start_server(;
                         ]
                         return HTTP.Response(200, headers, "")
                     end
-                    
-                    # Add basic context to request (LeverageSystem loaded lazily)
                     req.context = Dict{Symbol,Any}(
-                        :leverage_context => nothing, # Loaded on demand
+                        :leverage_context => nothing,
                         :cors_headers => CORS_HEADERS
                     )
-                    
                     return req
                 end
             ],
