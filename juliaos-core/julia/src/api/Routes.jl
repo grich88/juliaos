@@ -132,16 +132,14 @@ function register_routes(app=nothing)
     
     # HEAD support handled automatically by Oxygen.jl for GET routes
 
-    # Test router group with caching
-    test_router = router(BASE_PATH * "/test", tags=["Test"])
-    
-    @get test_router("/hello") function(req)
+    # Test routes registered directly on main app
+    @get app(BASE_PATH * "/test/hello") function(req)
         with_cache() do
             Dict("message" => "Hello, World!")
         end
     end
 
-    @post test_router("/params/{id}/{name}") function(req, id, name)
+    @post app(BASE_PATH * "/test/params/{id}/{name}") function(req, id, name)
         execute_async() do
             Dict("message" => "Received ID: $id, Name: $name")
         end
@@ -172,10 +170,8 @@ function register_routes(app=nothing)
     end
 
     # Agent router group with optimized handlers
-    agent_router = router(BASE_PATH * "/agents", tags=["Agent Management"])
-
     # Agent CRUD operations with caching for read operations
-    @post agent_router("") function(req)
+    @post app(BASE_PATH * "/agents") function(req)
         execute_async() do
             AgentHandlers.create_agent_handler(req)
         end
@@ -310,10 +306,8 @@ function register_routes(app=nothing)
         end
     end
 
-    # Mount all sub-routers to the main app
-    merge!(app, test_router)
-    merge!(app, agent_router)
-    merge!(app, dao_router)
+    # All routes are already registered directly on the main app
+    # No mounting needed - Oxygen routes are already part of the main app context
     
     @info "API routes registered with Oxygen under $BASE_PATH with enhanced performance features and health endpoints."
     
