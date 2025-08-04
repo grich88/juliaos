@@ -30,7 +30,7 @@ RUN cd /app/leverage && \
     python3 -c "import juliaos.leverage; print('juliaos.leverage module installed successfully')"
 
 # Install Julia dependencies
-RUN julia --project=. -e 'using Pkg; Pkg.instantiate()'
+RUN julia --project=. -e "import Pkg; Pkg.instantiate()"
 
 # Copy the rest of the application
 COPY juliaos-core/julia .
@@ -43,5 +43,5 @@ ENV HOST=0.0.0.0
 # Expose port
 EXPOSE 8080
 
-# Start the application
-CMD ["julia", "--project=.", "--threads", "3,1", "src/server.jl"]
+# Set entrypoint for production
+CMD ["julia", "--project=.", "src/server.jl"]
