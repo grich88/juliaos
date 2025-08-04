@@ -1113,5 +1113,6 @@ Remember: You're not just answering questions - you're a collaborative partner i
     return app, server
 end
 
-# End of module
-end # module Routes
+end # End of register_routes function
+
+end # End of Routes module
