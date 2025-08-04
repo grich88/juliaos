@@ -1,4 +1,9 @@
 # backend-julia/src/api/Routes.jl
+
+# Server configuration
+const DEFAULT_PORT = get(ENV, "PORT", "8080")
+const HOST = get(ENV, "HOST", "0.0.0.0")
+
 """
 JuliaOS DAO Governance Analysis System
 ====================================
@@ -1075,8 +1080,37 @@ Remember: You're not just answering questions - you're a collaborative partner i
     
     @info "API routes registered with Oxygen under $BASE_PATH with enhanced CORS support and health endpoints."
     
-    # Return the configured router
-    return app
+    # Add startup health check endpoint
+    @get app("/") function(req::HTTP.Request)
+        return HTTP.Response(200, ["Content-Type" => "application/json"], 
+            body=JSON3.write(Dict(
+                "status" => "running",
+                "service" => "juliaos-backend",
+                "version" => "1.0.0",
+                "port" => DEFAULT_PORT,
+                "host" => HOST
+            ))
+        )
+    end
+
+    # Configure server startup
+    server = Oxygen.serve(
+        app,
+        HOST,
+        parse(Int, DEFAULT_PORT);
+        access_log=true,
+        error_log=true,
+        servername="JuliaOS-Backend/1.0.0",
+        stream_timeout=30,
+        readtimeout=30,
+        connection_count=100,
+        keep_alive=true
+    )
+    
+    @info "JuliaOS Backend started on http://$(HOST):$(DEFAULT_PORT)"
+    
+    # Return the configured router and server
+    return app, server
 end
 
 # End of module

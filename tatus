@@ -1,0 +1,17 @@
+[33mcommit 06954dfa3643557b9ba503d6da868613ee32c6c0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: kolcompass <kolcompass@proton.me>
+Date:   Tue Aug 5 04:58:54 2025 +1000
+
+    Fix module end statement structure
+
+[33mcommit 6732e09473327deceac8a41093313d0708a1c7e0[m
+Author: kolcompass <kolcompass@proton.me>
+Date:   Tue Aug 5 04:56:07 2025 +1000
+
+    Add comprehensive documentation, testing framework, and error handling
+
+[33mcommit bae1a6b9a82ca291be35597c9dcb4a20741c8d8d[m
+Author: kolcompass <kolcompass@proton.me>
+Date:   Tue Aug 5 04:54:53 2025 +1000
+
+    Implement full swarm coordination and onchain analysis for DAO governance
