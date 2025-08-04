@@ -171,16 +171,7 @@ function start_server(;
             port=api_port,
             before_request=[
                 req -> begin
-                    if uppercase(string(req.method)) == "OPTIONS"
-                        headers = [
-                            "Content-Type" => "application/json",
-                            "Access-Control-Allow-Origin" => "*",
-                            "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
-                            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
-                            "Access-Control-Max-Age" => "86400"
-                        ]
-                        return HTTP.Response(200, headers, "")
-                    end
+                    # Initialize request context with CORS headers
                     req.context = Dict{Symbol,Any}(
                         :leverage_context => nothing,
                         :cors_headers => CORS_HEADERS

@@ -370,13 +370,20 @@ function register_routes(app=nothing)
         return add_cors_headers(response_data)
     end
 
-    # The aggressive middleware in MainServer.jl should handle all OPTIONS requests
-    # Frontend has been updated to send proper POST body to match backend expectations
+    # Add explicit OPTIONS handlers for parameterized routes to fix CORS preflight
+    @options app(BASE_PATH * "/dao/{dao_id}/proposals") function(req, dao_id)
+        return add_cors_headers(Dict("status" => "OK"))
+    end
 
-    # All routes are already registered directly on the main app
-    # No mounting needed - Oxygen routes are already part of the main app context
+    @options app(BASE_PATH * "/dao/{dao_id}/proposals/{proposal_id}") function(req, dao_id, proposal_id)
+        return add_cors_headers(Dict("status" => "OK"))
+    end
+
+    @options app(BASE_PATH * "/proposals/{proposal_id}/analyze") function(req, proposal_id)
+        return add_cors_headers(Dict("status" => "OK"))
+    end
     
-    @info "API routes registered with Oxygen under $BASE_PATH with enhanced performance features and health endpoints."
+    @info "API routes registered with Oxygen under $BASE_PATH with enhanced CORS support and health endpoints."
     
     # Return the configured router
     return app
