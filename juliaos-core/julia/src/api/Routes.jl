@@ -276,12 +276,18 @@ function register_routes(app=nothing)
 
     # Note: @options not supported in this Oxygen.jl version - CORS handled by middleware
 
-    @get app(BASE_PATH * "/dao/{dao_id}/proposals") function(req, dao_id)
+        # Register both GET and OPTIONS handlers for the DAO proposals endpoint
+    @route ["GET", "OPTIONS"] app(BASE_PATH * "/dao/{dao_id}/proposals") function(req, dao_id)
+        # Handle OPTIONS preflight request
+        if uppercase(string(req.method)) == "OPTIONS"
+            return add_cors_headers(Dict("status" => "OK"))
+        end
+        
         # Real DAO governance proposals based on DAO type/address
         response_data = Dict("proposals" => [
             Dict(
                 "address" => "prop1",
-                "title" => "Treasury Diversification Strategy", 
+                "title" => "Treasury Diversification Strategy",
                 "description" => "Propose to diversify 25% of treasury holdings into stablecoins and blue-chip tokens to reduce volatility risk and ensure operational stability during market downturns.",
                 "state" => "voting",
                 "created_at" => "2025-01-15T14:30:00Z",
@@ -294,7 +300,7 @@ function register_routes(app=nothing)
             Dict(
                 "address" => "prop2",
                 "title" => "Developer Grant Program Expansion",
-                "description" => "Allocate 500,000 tokens to expand the developer grant program, supporting 20 new projects building on our ecosystem with focus on DeFi infrastructure and user experience improvements.", 
+                "description" => "Allocate 500,000 tokens to expand the developer grant program, supporting 20 new projects building on our ecosystem with focus on DeFi infrastructure and user experience improvements.",
                 "state" => "succeeded",
                 "created_at" => "2025-01-08T09:15:00Z",
                 "votes_for" => 2100000,
@@ -307,7 +313,7 @@ function register_routes(app=nothing)
                 "address" => "prop3",
                 "title" => "Protocol Fee Reduction",
                 "description" => "Reduce trading fees from 0.3% to 0.25% to increase competitiveness against other DEXs while maintaining sustainable revenue for continued development.",
-                "state" => "voting", 
+                "state" => "voting",
                 "created_at" => "2025-01-20T16:45:00Z",
                 "votes_for" => 890000,
                 "votes_against" => 1200000,
@@ -319,8 +325,15 @@ function register_routes(app=nothing)
         return add_cors_headers(response_data)
     end
 
-    @get app(BASE_PATH * "/dao/{dao_id}/proposals/{proposal_id}") function(req, dao_id, proposal_id)
-        with_cache() do
+    # Register both GET and OPTIONS handlers for the single proposal endpoint
+    @route ["GET", "OPTIONS"] app(BASE_PATH * "/dao/{dao_id}/proposals/{proposal_id}") function(req, dao_id, proposal_id)
+        # Handle OPTIONS preflight request
+        if uppercase(string(req.method)) == "OPTIONS"
+            return add_cors_headers(Dict("status" => "OK"))
+        end
+        
+        # Handle GET request
+        response_data = with_cache() do
             # Mock response for now
             Dict(
                 "id" => proposal_id,
@@ -336,11 +349,18 @@ function register_routes(app=nothing)
                 )
             )
         end
+        return add_cors_headers(response_data)
     end
 
     # Proposal Analysis endpoint
-    @post app(BASE_PATH * "/proposals/{proposal_id}/analyze") function(req, proposal_id)
-        # AI-powered proposal analysis
+        # Register both POST and OPTIONS handlers for the analyze endpoint
+    @route ["POST", "OPTIONS"] app(BASE_PATH * "/proposals/{proposal_id}/analyze") function(req, proposal_id)
+        # Handle OPTIONS preflight request
+        if uppercase(string(req.method)) == "OPTIONS"
+            return add_cors_headers(Dict("status" => "OK"))
+        end
+        
+        # Handle POST request - AI-powered proposal analysis
         response_data = Dict(
             "proposal_id" => proposal_id,
             "analysis" => Dict(
@@ -348,7 +368,7 @@ function register_routes(app=nothing)
                 "sentiment" => "positive",
                 "key_points" => [
                     "Strong community support indicated",
-                    "Reasonable budget allocation", 
+                    "Reasonable budget allocation",
                     "Clear implementation timeline",
                     "Minimal technical risks identified"
                 ],
