@@ -725,12 +725,18 @@ function register_routes(app=nothing)
         # Get or create AI agent
         agent_id = get(body, "agent_id", nothing)
         if isnothing(agent_id)
-                            # Create a swarm of specialized agents for DAO governance
+                            # Create a JuliaOS-native swarm of specialized agents for DAO governance
                 swarm_configs = [
                     AgentConfig(
                         "proposal_analyzer_$(string(uuid4())[1:8])",
                         AgentType(:CUSTOM),
-                        abilities=["llm_chat", "evaluate_fitness", "analyze_proposals"],
+                        abilities=[
+                            "llm_chat",
+                            "evaluate_fitness", 
+                            "analyze_proposals",
+                            "juliaos.chain.query",  # Native chain querying
+                            "juliaos.ipfs.store",   # IPFS storage for proposal data
+                            "juliaos.ml.predict"    # ML-based outcome prediction
                         parameters=Dict(
                             "specialization" => "proposal_analysis",
                             "focus_areas" => ["technical_feasibility", "economic_impact", "governance_implications"]
@@ -739,7 +745,13 @@ function register_routes(app=nothing)
                     AgentConfig(
                         "market_analyst_$(string(uuid4())[1:8])",
                         AgentType(:CUSTOM),
-                        abilities=["llm_chat", "evaluate_fitness", "market_analysis"],
+                        abilities=[
+                            "llm_chat", 
+                            "evaluate_fitness", 
+                            "market_analysis",
+                            "juliaos.defi.analyze",     # DeFi protocol analysis
+                            "juliaos.market.predict",   # Market prediction models
+                            "juliaos.sentiment.analyze" # Social sentiment analysis
                         parameters=Dict(
                             "specialization" => "market_impact",
                             "data_sources" => ["onchain_metrics", "market_data", "social_sentiment"]
@@ -748,7 +760,13 @@ function register_routes(app=nothing)
                     AgentConfig(
                         "governance_expert_$(string(uuid4())[1:8])",
                         AgentType(:CUSTOM),
-                        abilities=["llm_chat", "evaluate_fitness", "governance_analysis"],
+                        abilities=[
+                            "llm_chat", 
+                            "evaluate_fitness", 
+                            "governance_analysis",
+                            "juliaos.dao.simulate",    # DAO simulation engine
+                            "juliaos.voting.analyze",  # Voting pattern analysis
+                            "juliaos.game.theory"      # Game theory optimization
                         parameters=Dict(
                             "specialization" => "governance_rules",
                             "frameworks" => ["voting_power", "quorum_requirements", "execution_timeline"]
@@ -756,11 +774,19 @@ function register_routes(app=nothing)
                     )
                 ]
                 
-                # Create the main coordinator agent
+                # Create the main JuliaOS coordinator agent with advanced capabilities
                 cfg = AgentConfig(
                     "coordinator_$(string(uuid4())[1:8])", 
                     AgentType(:COORDINATOR),
-                    abilities=["llm_chat", "evaluate_fitness", "swarm_coordination"],
+                    abilities=[
+                        "llm_chat",
+                        "evaluate_fitness",
+                        "swarm_coordination",
+                        "juliaos.swarm.optimize",    # Swarm optimization
+                        "juliaos.memory.shared",     # Shared memory system
+                        "juliaos.consensus.reach",   # Multi-agent consensus
+                        "juliaos.parallel.execute",  # Parallel execution
+                        "juliaos.knowledge.graph"    # Knowledge graph building
                 parameters=Dict(
                     "model" => "gpt-4-turbo-preview",
                     "temperature" => 0.8,
@@ -870,7 +896,35 @@ Remember: You're not just answering questions - you're a collaborative partner i
                         "voting_power_distribution",
                         "treasury_stats",
                         "governance_parameters"
+                    ],
+                    "cross_chain" => [
+                        Dict("chain" => "ethereum", "type" => "governance"),
+                        Dict("chain" => "polygon", "type" => "treasury"),
+                        Dict("chain" => "arbitrum", "type" => "voting")
                     ]
+                ),
+                "juliaos_features" => Dict(
+                    "swarm" => Dict(
+                        "optimization" => "genetic",
+                        "consensus" => "weighted_vote",
+                        "communication" => "mesh",
+                        "learning" => "federated"
+                    ),
+                    "storage" => Dict(
+                        "type" => "distributed",
+                        "replication" => 3,
+                        "consistency" => "eventual"
+                    ),
+                    "compute" => Dict(
+                        "type" => "parallel",
+                        "workers" => 8,
+                        "gpu_enabled" => true
+                    ),
+                    "ml" => Dict(
+                        "models" => ["transformer", "gnn", "lstm"],
+                        "training" => "online",
+                        "optimization" => "adam"
+                    )
                 ),
                 "analysis_parameters" => Dict(
                     "proposal_analysis" => Dict(
@@ -1025,4 +1079,5 @@ Remember: You're not just answering questions - you're a collaborative partner i
     return app
 end
 
-end
+# End of module
+end # module Routes
