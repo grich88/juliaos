@@ -2,6 +2,7 @@
 module Routes
 
 using Oxygen
+using Oxygen: @get, @post, @put, @delete, @options, router, serve
 using HTTP
 using JSON3
 using StructTypes

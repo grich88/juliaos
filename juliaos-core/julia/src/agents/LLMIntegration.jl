@@ -8,7 +8,7 @@ supporting pluggability and advanced features.
 """
 module LLMIntegration
 
-using Logging, Pkg # Use Pkg to check package availability
+using Logging # For logging LLM interactions
 using JSON3 # Needed for parsing/serializing provider-specific configs and request/response bodies
 using HTTP  # For making direct HTTP calls
 
