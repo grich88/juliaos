@@ -12,6 +12,40 @@ using UUIDs
 # Import handlers
 using ..AgentHandlers
 
+# CORS headers
+const CORS_HEADERS = [
+    "Access-Control-Allow-Origin" => "*",
+    "Access-Control-Allow-Methods" => "POST, GET, OPTIONS",
+    "Access-Control-Allow-Headers" => "Content-Type, Authorization",
+    "Access-Control-Max-Age" => "86400"
+]
+
+# Add CORS headers to any response
+function add_cors_headers(response::HTTP.Response)
+    for (key, value) in CORS_HEADERS
+        HTTP.setheader(response, key => value)
+    end
+    return response
+end
+
+function add_cors_headers(data::Dict)
+    return HTTP.Response(200, CORS_HEADERS, body=JSON3.write(data))
+end
+
+# Error response with CORS
+function error_response(message::String, status::Int=500; error_code::String="INTERNAL_ERROR", details::Dict=Dict())
+    response = HTTP.Response(
+        status,
+        CORS_HEADERS,
+        body=JSON3.write(Dict(
+            "error" => message,
+            "error_code" => error_code,
+            "details" => details
+        ))
+    )
+    return response
+end
+
 # Response caching system
 const RESPONSE_CACHE = Dict{String, Tuple{Any, Float64}}() # {cache_key => (response, timestamp)}
 const CACHE_TTL = 60.0 # 1 minute default TTL
@@ -413,13 +447,18 @@ function register_routes(app=nothing)
     @route ["POST", "OPTIONS"] app(BASE_PATH * "/ai/chat") function(req)
         # Handle OPTIONS preflight request
         if uppercase(string(req.method)) == "OPTIONS"
-            return add_cors_headers(Dict("status" => "OK"))
+            return HTTP.Response(200, CORS_HEADERS)
         end
+        
+        # Add CORS headers to all responses
+        HTTP.setheader(req, "Access-Control-Allow-Origin" => "*")
+        HTTP.setheader(req, "Access-Control-Allow-Methods" => "POST, OPTIONS")
+        HTTP.setheader(req, "Access-Control-Allow-Headers" => "Content-Type, Authorization")
         
         # Parse request body
         body = Utils.parse_request_body(req)
         if isnothing(body) || !haskey(body, "message") || !isa(body["message"], String) || isempty(body["message"])
-            return Utils.error_response("Request body must include a non-empty 'message' string", 400)
+            return error_response("Request body must include a non-empty 'message' string", 400, error_code="INVALID_REQUEST", details=Dict("field" => "message"))
         end
         
         # Get or create AI agent
@@ -586,10 +625,29 @@ Remember: You're not just answering questions - you're a collaborative partner i
                 )
                 return add_cors_headers(response_data)
             else
-                return Utils.error_response("Chat task failed or timed out", 500)
+                return error_response(
+                    "Chat task failed or timed out", 
+                    500,
+                    error_code="TASK_FAILED",
+                    details=Dict(
+                        "agent_id" => agent_id,
+                        "task_id" => task_id,
+                        "task_status" => get(task_result, "status", "unknown"),
+                        "error_details" => get(task_result, "error", nothing)
+                    )
+                )
             end
         else
-            return Utils.error_response("Failed to execute chat task", 500)
+            return error_response(
+                "Failed to execute chat task", 
+                500,
+                error_code="EXECUTION_FAILED",
+                details=Dict(
+                    "agent_id" => agent_id,
+                    "error_details" => get(result, "error", nothing),
+                    "agent_status" => try string(Agents.getAgentStatus(agent_id)["status"]) catch; "unknown" end
+                )
+            )
         end
     end
     
