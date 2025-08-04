@@ -31,9 +31,6 @@ services:
       - key: NPM_VERSION
         value: 9.6.7
       - key: NEXT_PUBLIC_API_URL
-        fromService:
-          name: juliaos-backend
-          type: web
-          property: host
+        value: https://juliaos-backend.onrender.com
       - key: NODE_ENV
         value: production
