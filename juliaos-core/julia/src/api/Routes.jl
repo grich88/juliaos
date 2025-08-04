@@ -315,10 +315,10 @@ function with_cache(handler::Function, ttl::Float64=CACHE_TTL)
             HTTP.header(req, "Authorization", ""),
             args
         )
-        
+
         lock(CACHE_LOCK) do
             current_time = time()
-            
+
             # Check cache
             if haskey(RESPONSE_CACHE, cache_key)
                 response, timestamp = RESPONSE_CACHE[cache_key]
@@ -326,14 +326,14 @@ function with_cache(handler::Function, ttl::Float64=CACHE_TTL)
                     return response
                 end
             end
-            
+
             # Execute handler and cache result
             response = handler(req, args...)
             RESPONSE_CACHE[cache_key] = (response, current_time)
-            
+
             # Clean old entries
             filter!(pair -> current_time - pair.second[2] < ttl, RESPONSE_CACHE)
-            
+
             return response
         end
     end
@@ -390,7 +390,7 @@ StructTypes.StructType(::Type{TestResponse}) = StructTypes.Struct()
 
 function register_routes(app=nothing)
     # Use the global BASE_PATH constant
-    
+
     # If no router is provided, create a new one
     if isnothing(app)
         app = Oxygen.router()
@@ -405,17 +405,17 @@ function register_routes(app=nothing)
         "uptime" => time(),
         "build" => "optimized"
     )
-    
+
     # Add health endpoints directly to main app router
     @get app(BASE_PATH * "/health") function(req)
         return add_cors_headers(health_response())
     end
-    
+
     # Also add root health endpoint
     @get app("/") function(req)
         return add_cors_headers(health_response())
     end
-    
+
     # Test routes registered directly on main app
     @get app(BASE_PATH * "/test/hello") function(req)
         with_cache() do
@@ -441,7 +441,7 @@ function register_routes(app=nothing)
         if (error = validate_request(req, schema)) !== nothing
             return error
         end
-        
+
         execute_async() do
             request_data = JSON3.read(req.body, TestRequest)
             response = TestResponse(
@@ -560,7 +560,7 @@ function register_routes(app=nothing)
         if uppercase(string(req.method)) == "OPTIONS"
             return add_cors_headers(Dict("status" => "OK"))
         end
-        
+
         # Real DAO governance proposals based on DAO type/address
         response_data = Dict("proposals" => [
             Dict(
@@ -609,7 +609,7 @@ function register_routes(app=nothing)
         if uppercase(string(req.method)) == "OPTIONS"
             return add_cors_headers(Dict("status" => "OK"))
         end
-        
+
         # Handle GET request
         response_data = with_cache() do
             # Mock response for now
@@ -637,7 +637,7 @@ function register_routes(app=nothing)
         if uppercase(string(req.method)) == "OPTIONS"
             return add_cors_headers(Dict("status" => "OK"))
         end
-        
+
         # Handle POST request - AI-powered proposal analysis
         response_data = Dict(
             "proposal_address" => proposal_id,
@@ -691,33 +691,33 @@ function register_routes(app=nothing)
     @route ["POST", "OPTIONS"] app(BASE_PATH * "/ai/chat") function(req)
         # Get origin-specific CORS headers
         cors_headers = get_cors_headers(req)
-        
+
         # Handle OPTIONS preflight request
         if uppercase(string(req.method)) == "OPTIONS"
             return HTTP.Response(200, cors_headers)
         end
-        
+
         # Add CORS headers to all responses
         for (key, value) in cors_headers
             HTTP.setheader(req, key => value)
         end
-        
+
         # Validate origin
         origin = HTTP.header(req, "Origin", "")
         if !(origin in ALLOWED_ORIGINS)
             return error_response(
-                "Invalid origin", 
-                403, 
+                "Invalid origin",
+                403,
                 error_code="FORBIDDEN_ORIGIN",
                 details=Dict("origin" => origin)
             )
-        
+
         # Parse request body
         body = Utils.parse_request_body(req)
         if isnothing(body) || !haskey(body, "message") || !isa(body["message"], String) || isempty(body["message"])
             return error_response("Request body must include a non-empty 'message' string", 400, error_code="INVALID_REQUEST", details=Dict("field" => "message"))
         end
-        
+
         # Get or create AI agent
         agent_id = get(body, "agent_id", nothing)
         if isnothing(agent_id)
@@ -728,7 +728,7 @@ function register_routes(app=nothing)
                         AgentType(:CUSTOM),
                         abilities=[
                             "llm_chat",
-                            "evaluate_fitness", 
+                            "evaluate_fitness",
                             "analyze_proposals",
                             "juliaos.chain.query",  # Native chain querying
                             "juliaos.ipfs.store",   # IPFS storage for proposal data
@@ -743,8 +743,8 @@ function register_routes(app=nothing)
                         "market_analyst_$(string(uuid4())[1:8])",
                         AgentType(:CUSTOM),
                         abilities=[
-                            "llm_chat", 
-                            "evaluate_fitness", 
+                            "llm_chat",
+                            "evaluate_fitness",
                             "market_analysis",
                             "juliaos.defi.analyze",     # DeFi protocol analysis
                             "juliaos.market.predict",   # Market prediction models
@@ -759,8 +759,8 @@ function register_routes(app=nothing)
                         "governance_expert_$(string(uuid4())[1:8])",
                         AgentType(:CUSTOM),
                         abilities=[
-                            "llm_chat", 
-                            "evaluate_fitness", 
+                            "llm_chat",
+                            "evaluate_fitness",
                             "governance_analysis",
                             "juliaos.dao.simulate",    # DAO simulation engine
                             "juliaos.voting.analyze",  # Voting pattern analysis
@@ -772,10 +772,10 @@ function register_routes(app=nothing)
                         )
                     )
                 ]
-                
+
                 # Create the main JuliaOS coordinator agent with advanced capabilities
                 cfg = AgentConfig(
-                    "coordinator_$(string(uuid4())[1:8])", 
+                    "coordinator_$(string(uuid4())[1:8])",
                     AgentType(:COORDINATOR),
                     abilities=[
                         "llm_chat",
@@ -840,11 +840,11 @@ Remember: You're not just answering questions - you're a collaborative partner i
             agent_id = new_agent.id
             Agents.startAgent(agent_id)
         end
-        
+
         # Execute chat task with enhanced context handling
         context = get(body, "context", Dict())
         history = get(body, "history", [])
-        
+
         # Enhance context with code analysis if code is detected
         if contains(body["message"], "```") || contains(body["message"], "function") || contains(body["message"], "struct")
             context["code_analysis"] = Dict(
@@ -855,7 +855,7 @@ Remember: You're not just answering questions - you're a collaborative partner i
                 "suggest_improvements" => true
             )
         end
-        
+
         # Add conversation management metadata
         context["conversation"] = Dict(
             "turn_count" => length(history) + 1,
@@ -863,7 +863,7 @@ Remember: You're not just answering questions - you're a collaborative partner i
             "interaction_style" => get(context, "interaction_style", "collaborative"),
             "expertise_level" => get(context, "expertise_level", "adaptive")
         )
-        
+
         # Create swarm agents and get their IDs
         swarm_agent_ids = []
         for swarm_cfg in swarm_configs
@@ -947,24 +947,24 @@ Remember: You're not just answering questions - you're a collaborative partner i
                 )
             )
         )
-        
+
         result = execute_async() do
             Agents.executeAgentTask(agent_id, task_payload)
         end
-        
+
         # Process result
         if get(result, "success", false)
             task_id = result["task_id"]
             task_result = Agents.getTaskResult(agent_id, task_id)
-            
+
             if get(task_result, "status", "") == "completed"
                 # Enhanced response processing
                 raw_response = get(task_result, "response", "")
                 processed_response = raw_response
-                
+
                 # Add code formatting improvements if code blocks are present
                 if contains(raw_response, "```")
-                    processed_response = replace(processed_response, 
+                    processed_response = replace(processed_response,
                         r"```julia\n(.*?)\n```"s => s -> begin
                             code = match(r"```julia\n(.*?)\n```"s, s.match)[1]
                             formatted_code = try
@@ -977,7 +977,7 @@ Remember: You're not just answering questions - you're a collaborative partner i
                         end
                     )
                 end
-                
+
                 # Enhanced response data with rich metadata and token analysis
                 response_data = Dict(
                     "agent_id" => agent_id,
@@ -1048,7 +1048,7 @@ Remember: You're not just answering questions - you're a collaborative partner i
                 return add_cors_headers(response_data)
             else
                 return error_response(
-                    "Chat task failed or timed out", 
+                    "Chat task failed or timed out",
                     500,
                     error_code="TASK_FAILED",
                     details=Dict(
@@ -1061,7 +1061,7 @@ Remember: You're not just answering questions - you're a collaborative partner i
             end
         else
             return error_response(
-                "Failed to execute chat task", 
+                "Failed to execute chat task",
                 500,
                 error_code="EXECUTION_FAILED",
                 details=Dict(
@@ -1072,16 +1072,16 @@ Remember: You're not just answering questions - you're a collaborative partner i
             )
         end
     end
-    
+
     @info "API routes registered with Oxygen under $BASE_PATH with enhanced CORS support and health endpoints."
-    
+
     # Add startup health check endpoint
     @get app("/") function(req::HTTP.Request)
-        return HTTP.Response(200, 
+        return HTTP.Response(200,
             vcat(
                 ["Content-Type" => "application/json"],
                 CORS_HEADERS
-            ), 
+            ),
             body=JSON3.write(Dict(
                 "status" => "running",
                 "service" => "juliaos-backend",
@@ -1106,9 +1106,9 @@ Remember: You're not just answering questions - you're a collaborative partner i
         connection_count=100,
         keep_alive=true
     )
-    
+
     @info "JuliaOS Backend started on http://$(HOST):$(DEFAULT_PORT)"
-    
+
     # Return the configured router and server
     return app, server
 end
