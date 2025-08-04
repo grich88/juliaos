@@ -378,18 +378,6 @@ function register_routes(app=nothing)
     
     @info "API routes registered with Oxygen under $BASE_PATH with enhanced performance features and health endpoints."
     
-    # Catch-all OPTIONS route for CORS preflight (must be last)
-    @route app("OPTIONS", "*") function(req)
-        headers = [
-            "Content-Type" => "application/json",
-            "Access-Control-Allow-Origin" => "*",
-            "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
-            "Access-Control-Max-Age" => "86400"
-        ]
-        return HTTP.Response(200, headers, "")
-    end
-
     # Return the configured router
     return app
 end
