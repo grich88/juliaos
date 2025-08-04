@@ -74,14 +74,8 @@ const LoadingIndicator = memo(() => (
 LoadingIndicator.displayName = 'LoadingIndicator'
 
 export const AIChatInterface: React.FC<AIChatInterfaceProps> = memo(({ className = '' }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      type: 'ai',
-      content: 'Hello! I\'m your AI governance advisor powered by JuliaOS. Ask me anything about DAO governance, proposal analysis, or Solana ecosystem insights!',
-      timestamp: new Date()
-    }
-  ])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [isInitialized, setIsInitialized] = useState(false)
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -90,6 +84,18 @@ export const AIChatInterface: React.FC<AIChatInterfaceProps> = memo(({ className
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [])
+
+  useEffect(() => {
+    if (!isInitialized) {
+      setMessages([{
+        id: '1',
+        type: 'ai',
+        content: 'Hello! I\'m your AI governance advisor powered by JuliaOS. Ask me anything about DAO governance, proposal analysis, or Solana ecosystem insights!',
+        timestamp: new Date()
+      }])
+      setIsInitialized(true)
+    }
+  }, [isInitialized])
 
   useEffect(() => {
     scrollToBottom()
