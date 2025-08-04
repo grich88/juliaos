@@ -310,6 +310,11 @@ function register_routes(app=nothing)
         end
     end
 
+    # Mount all sub-routers to the main app
+    merge!(app, test_router)
+    merge!(app, agent_router)
+    merge!(app, dao_router)
+    
     @info "API routes registered with Oxygen under $BASE_PATH with enhanced performance features and health endpoints."
     
     # Return the configured router
