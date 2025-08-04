@@ -389,7 +389,7 @@ StructTypes.StructType(::Type{TestRequest}) = StructTypes.Struct()
 StructTypes.StructType(::Type{TestResponse}) = StructTypes.Struct()
 
 function register_routes(app=nothing)
-    BASE_PATH = "/api/v1"
+    # Use the global BASE_PATH constant
     
     # If no router is provided, create a new one
     if isnothing(app)
@@ -473,13 +473,13 @@ function register_routes(app=nothing)
         end
     end
 
-    @put app("/{agent_id}") function(req, agent_id)
+    @put app(BASE_PATH * "/agents/{agent_id}") function(req, agent_id)
         execute_async() do
             AgentHandlers.update_agent_handler(req, agent_id)
         end
     end
 
-    @delete app("/{agent_id}") function(req, agent_id)
+    @delete app(BASE_PATH * "/agents/{agent_id}") function(req, agent_id)
         execute_async() do
             AgentHandlers.delete_agent_handler(req, agent_id)
         end
@@ -550,17 +550,7 @@ function register_routes(app=nothing)
 
     # DAO routes (registered directly on main app)
 
-    # Add CORS headers to all responses
-    function add_cors_headers(response_data)
-        headers = [
-            "Content-Type" => "application/json",
-            "Access-Control-Allow-Origin" => "*",
-            "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
-            "Access-Control-Max-Age" => "86400"
-        ]
-        return HTTP.Response(200, headers, JSON3.write(response_data))
-    end
+    # Use the global add_cors_headers function for consistent CORS handling
 
     # Note: @options not supported in this Oxygen.jl version - CORS handled by middleware
 
