@@ -374,61 +374,8 @@ function register_routes(app=nothing)
         return add_cors_headers(response_data)
     end
 
-    # OPTIONS handlers for CORS preflight requests
-    @route app("OPTIONS", BASE_PATH * "/proposals/{proposal_id}/analyze") function(req, proposal_id)
-        headers = [
-            "Content-Type" => "application/json",
-            "Access-Control-Allow-Origin" => "*",
-            "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
-            "Access-Control-Max-Age" => "86400"
-        ]
-        return HTTP.Response(200, headers, "")
-    end
-
-    @route app("OPTIONS", BASE_PATH * "/dao/{dao_id}/proposals") function(req, dao_id)
-        headers = [
-            "Content-Type" => "application/json",
-            "Access-Control-Allow-Origin" => "*",
-            "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
-            "Access-Control-Max-Age" => "86400"
-        ]
-        return HTTP.Response(200, headers, "")
-    end
-
-    @route app("OPTIONS", BASE_PATH * "/dao/{dao_id}/proposals/{proposal_id}") function(req, dao_id, proposal_id)
-        headers = [
-            "Content-Type" => "application/json",
-            "Access-Control-Allow-Origin" => "*",
-            "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
-            "Access-Control-Max-Age" => "86400"
-        ]
-        return HTTP.Response(200, headers, "")
-    end
-
-    @route app("OPTIONS", BASE_PATH * "/health") function(req)
-        headers = [
-            "Content-Type" => "application/json",
-            "Access-Control-Allow-Origin" => "*",
-            "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
-            "Access-Control-Max-Age" => "86400"
-        ]
-        return HTTP.Response(200, headers, "")
-    end
-
-    @route app("OPTIONS", "/") function(req)
-        headers = [
-            "Content-Type" => "application/json",
-            "Access-Control-Allow-Origin" => "*",
-            "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
-            "Access-Control-Max-Age" => "86400"
-        ]
-        return HTTP.Response(200, headers, "")
-    end
+    # Note: OPTIONS handlers removed - CORS handled by middleware in MainServer.jl
+    # The before_request middleware in MainServer.jl handles all OPTIONS preflight requests
 
     # All routes are already registered directly on the main app
     # No mounting needed - Oxygen routes are already part of the main app context
