@@ -2,7 +2,6 @@
 module Routes
 
 using Oxygen
-using Oxygen: @get, @post, @put, @delete, @options, router, serve
 using HTTP
 using JSON3
 using StructTypes
@@ -129,9 +128,7 @@ function register_routes(app=nothing)
         return health_response()
     end
     
-    @options app("/") function(req)
-        return HTTP.Response(200, ["Content-Type" => "application/json"], body="")
-    end
+    # OPTIONS support not needed - CORS headers handled by middleware
     
     # HEAD support handled automatically by Oxygen.jl for GET routes
 
