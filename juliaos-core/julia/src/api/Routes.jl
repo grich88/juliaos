@@ -521,11 +521,42 @@ function register_routes(app=nothing)
         # Get or create AI agent
         agent_id = get(body, "agent_id", nothing)
         if isnothing(agent_id)
-            # Create new agent for this chat
-            cfg = AgentConfig(
-                "chat_agent_$(string(uuid4())[1:8])", 
-                AgentType(:CUSTOM),
-                abilities=["llm_chat", "evaluate_fitness"],
+                            # Create a swarm of specialized agents for DAO governance
+                swarm_configs = [
+                    AgentConfig(
+                        "proposal_analyzer_$(string(uuid4())[1:8])",
+                        AgentType(:CUSTOM),
+                        abilities=["llm_chat", "evaluate_fitness", "analyze_proposals"],
+                        parameters=Dict(
+                            "specialization" => "proposal_analysis",
+                            "focus_areas" => ["technical_feasibility", "economic_impact", "governance_implications"]
+                        )
+                    ),
+                    AgentConfig(
+                        "market_analyst_$(string(uuid4())[1:8])",
+                        AgentType(:CUSTOM),
+                        abilities=["llm_chat", "evaluate_fitness", "market_analysis"],
+                        parameters=Dict(
+                            "specialization" => "market_impact",
+                            "data_sources" => ["onchain_metrics", "market_data", "social_sentiment"]
+                        )
+                    ),
+                    AgentConfig(
+                        "governance_expert_$(string(uuid4())[1:8])",
+                        AgentType(:CUSTOM),
+                        abilities=["llm_chat", "evaluate_fitness", "governance_analysis"],
+                        parameters=Dict(
+                            "specialization" => "governance_rules",
+                            "frameworks" => ["voting_power", "quorum_requirements", "execution_timeline"]
+                        )
+                    )
+                ]
+                
+                # Create the main coordinator agent
+                cfg = AgentConfig(
+                    "coordinator_$(string(uuid4())[1:8])", 
+                    AgentType(:COORDINATOR),
+                    abilities=["llm_chat", "evaluate_fitness", "swarm_coordination"],
                 parameters=Dict(
                     "model" => "gpt-4-turbo-preview",
                     "temperature" => 0.8,
@@ -603,18 +634,58 @@ Remember: You're not just answering questions - you're a collaborative partner i
             "expertise_level" => get(context, "expertise_level", "adaptive")
         )
         
+        # Create swarm agents and get their IDs
+        swarm_agent_ids = []
+        for swarm_cfg in swarm_configs
+            agent = Agents.createAgent(swarm_cfg)
+            push!(swarm_agent_ids, agent.id)
+            Agents.startAgent(agent.id)
+        end
+
+        # Execute swarm coordination task
         task_payload = Dict(
-            "ability" => "llm_chat",
+            "ability" => "swarm_coordination",
             "input" => Dict(
                 "message" => body["message"],
                 "context" => context,
                 "history" => history,
+                "swarm_agents" => swarm_agent_ids,
+                "analysis_type" => "dao_governance",
                 "response_format" => Dict(
                     "style" => "detailed",
                     "include_code_examples" => true,
                     "include_explanations" => true,
                     "include_references" => true,
                     "max_code_blocks" => 5
+                ),
+                "onchain_data" => Dict(
+                    "chain" => "solana",
+                    "program_id" => "84pGFuy1Y27ApK67ApethaPvexeDWA66zNV8gm38TVeQ",
+                    "required_data" => [
+                        "proposal_history",
+                        "voting_power_distribution",
+                        "treasury_stats",
+                        "governance_parameters"
+                    ]
+                ),
+                "analysis_parameters" => Dict(
+                    "proposal_analysis" => Dict(
+                        "technical_review" => true,
+                        "economic_impact" => true,
+                        "governance_implications" => true,
+                        "risk_assessment" => true
+                    ),
+                    "market_analysis" => Dict(
+                        "token_metrics" => true,
+                        "market_sentiment" => true,
+                        "comparative_analysis" => true
+                    ),
+                    "governance_analysis" => Dict(
+                        "voting_threshold_analysis" => true,
+                        "quorum_requirements" => true,
+                        "execution_timeline" => true,
+                        "stakeholder_impact" => true
+                    )
                 )
             )
         )
