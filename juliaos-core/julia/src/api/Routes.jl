@@ -371,15 +371,16 @@ function register_routes(app=nothing)
     end
 
     # Add explicit OPTIONS handlers for parameterized routes to fix CORS preflight
-    @options app(BASE_PATH * "/dao/{dao_id}/proposals") function(req, dao_id)
+    # Using function-style registration for better compatibility with Oxygen.jl v1.7.2
+    Oxygen.options(app, BASE_PATH * "/dao/{dao_id}/proposals") do req, dao_id
         return add_cors_headers(Dict("status" => "OK"))
     end
 
-    @options app(BASE_PATH * "/dao/{dao_id}/proposals/{proposal_id}") function(req, dao_id, proposal_id)
+    Oxygen.options(app, BASE_PATH * "/dao/{dao_id}/proposals/{proposal_id}") do req, dao_id, proposal_id
         return add_cors_headers(Dict("status" => "OK"))
     end
 
-    @options app(BASE_PATH * "/proposals/{proposal_id}/analyze") function(req, proposal_id)
+    Oxygen.options(app, BASE_PATH * "/proposals/{proposal_id}/analyze") do req, proposal_id
         return add_cors_headers(Dict("status" => "OK"))
     end
     
