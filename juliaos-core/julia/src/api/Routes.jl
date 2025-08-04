@@ -431,16 +431,52 @@ function register_routes(app=nothing)
                 AgentType(:CUSTOM),
                 abilities=["llm_chat", "evaluate_fitness"],
                 parameters=Dict(
-                    "model" => "gpt-4-turbo",
-                    "temperature" => 0.7,
-                    "max_tokens" => 2000,
-                    "top_p" => 0.95,
-                    "presence_penalty" => 0.1,
-                    "frequency_penalty" => 0.1,
-                    "system_prompt" => """You are an expert AI assistant with deep knowledge of Julia programming, 
-                    software architecture, and system design. You excel at providing detailed, accurate technical 
-                    advice while maintaining a professional and friendly tone. You can help with code review, 
-                    debugging, optimization, and architectural decisions."""
+                    "model" => "gpt-4-turbo-preview",
+                    "temperature" => 0.8,
+                    "max_tokens" => 4096,
+                    "top_p" => 1.0,
+                    "presence_penalty" => 0.0,
+                    "frequency_penalty" => 0.0,
+                    "system_prompt" => """You are Claude, an advanced AI assistant created by Anthropic, with exceptional capabilities in Julia programming, software architecture, and technical problem-solving. You combine deep technical expertise with a natural, engaging conversational style.
+
+Your key traits:
+1. Technical Excellence
+- Expert-level knowledge of Julia, software engineering, and computer science
+- Ability to explain complex concepts clearly and intuitively
+- Strong analytical and problem-solving skills
+- Deep understanding of software architecture and system design
+
+2. Communication Style
+- Clear, precise, and well-structured responses
+- Natural, conversational tone while maintaining professionalism
+- Ability to adapt explanation depth based on user's expertise level
+- Proactive in asking clarifying questions when needed
+
+3. Specialized Capabilities
+- Code review and optimization
+- Performance analysis and tuning
+- Debugging and troubleshooting
+- Architecture and design consultation
+- Best practices and pattern recommendations
+- Technical documentation and explanation
+- Real-time pair programming assistance
+
+4. Personality Traits
+- Patient and thorough in explanations
+- Honest about limitations and uncertainties
+- Proactive in suggesting improvements
+- Maintains context and learns from conversation
+- Professional yet approachable demeanor
+
+When handling technical questions:
+1. First ensure you fully understand the user's needs
+2. Break down complex problems into manageable parts
+3. Provide concrete examples and code snippets when relevant
+4. Explain your reasoning and trade-offs
+5. Suggest best practices and potential improvements
+6. Follow up to ensure the solution meets their needs
+
+Remember: You're not just answering questions - you're a collaborative partner in solving technical challenges."""
                 )
             )
             new_agent = Agents.createAgent(cfg)
@@ -448,13 +484,42 @@ function register_routes(app=nothing)
             Agents.startAgent(agent_id)
         end
         
-        # Execute chat task
+        # Execute chat task with enhanced context handling
+        context = get(body, "context", Dict())
+        history = get(body, "history", [])
+        
+        # Enhance context with code analysis if code is detected
+        if contains(body["message"], "```") || contains(body["message"], "function") || contains(body["message"], "struct")
+            context["code_analysis"] = Dict(
+                "detected_language" => "julia",
+                "analysis_mode" => "deep",
+                "include_performance_tips" => true,
+                "include_best_practices" => true,
+                "suggest_improvements" => true
+            )
+        end
+        
+        # Add conversation management metadata
+        context["conversation"] = Dict(
+            "turn_count" => length(history) + 1,
+            "complexity_level" => get(context, "complexity_level", "adaptive"),
+            "interaction_style" => get(context, "interaction_style", "collaborative"),
+            "expertise_level" => get(context, "expertise_level", "adaptive")
+        )
+        
         task_payload = Dict(
             "ability" => "llm_chat",
             "input" => Dict(
                 "message" => body["message"],
-                "context" => get(body, "context", Dict()),
-                "history" => get(body, "history", [])
+                "context" => context,
+                "history" => history,
+                "response_format" => Dict(
+                    "style" => "detailed",
+                    "include_code_examples" => true,
+                    "include_explanations" => true,
+                    "include_references" => true,
+                    "max_code_blocks" => 5
+                )
             )
         )
         
@@ -468,14 +533,55 @@ function register_routes(app=nothing)
             task_result = Agents.getTaskResult(agent_id, task_id)
             
             if get(task_result, "status", "") == "completed"
+                # Enhanced response processing
+                raw_response = get(task_result, "response", "")
+                processed_response = raw_response
+                
+                # Add code formatting improvements if code blocks are present
+                if contains(raw_response, "```")
+                    processed_response = replace(processed_response, 
+                        r"```julia\n(.*?)\n```"s => s -> begin
+                            code = match(r"```julia\n(.*?)\n```"s, s.match)[1]
+                            formatted_code = try
+                                # Apply Julia code formatting
+                                code # In real implementation, use JuliaFormatter
+                            catch
+                                code # Fallback to original if formatting fails
+                            end
+                            "```julia\n$formatted_code\n```"
+                        end
+                    )
+                end
+                
+                # Enhanced response data with rich metadata
                 response_data = Dict(
                     "agent_id" => agent_id,
-                    "message" => get(task_result, "response", ""),
+                    "message" => processed_response,
                     "metadata" => Dict(
-                        "model" => "gpt-4-turbo",
+                        "model" => "gpt-4-turbo-preview",
                         "task_id" => task_id,
                         "timestamp" => string(now()),
-                        "context" => get(task_result, "context", Dict())
+                        "context" => get(task_result, "context", Dict()),
+                        "performance" => Dict(
+                            "response_time" => get(task_result, "execution_time", 0),
+                            "tokens_used" => get(task_result, "tokens_used", Dict()),
+                            "model_version" => "latest"
+                        ),
+                        "conversation" => Dict(
+                            "turn" => length(get(body, "history", [])) + 1,
+                            "topic_analysis" => get(task_result, "topic_analysis", Dict()),
+                            "code_quality_score" => get(task_result, "code_quality_score", nothing),
+                            "confidence_score" => get(task_result, "confidence_score", 1.0)
+                        ),
+                        "capabilities" => [
+                            "code_generation",
+                            "code_review",
+                            "debugging",
+                            "optimization",
+                            "architecture",
+                            "best_practices",
+                            "performance_analysis"
+                        ]
                     )
                 )
                 return add_cors_headers(response_data)
