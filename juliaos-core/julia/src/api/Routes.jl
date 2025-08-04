@@ -120,12 +120,12 @@ function register_routes(app=nothing)
     
     # Add health endpoints directly to main app router
     @get app(BASE_PATH * "/health") function(req)
-        return health_response()
+        return add_cors_headers(health_response())
     end
     
     # Also add root health endpoint
     @get app("/") function(req)
-        return health_response()
+        return add_cors_headers(health_response())
     end
     
     # OPTIONS support not needed - CORS headers handled by middleware
@@ -266,9 +266,23 @@ function register_routes(app=nothing)
 
     # DAO routes (registered directly on main app)
 
+    # Add CORS headers to all responses
+    function add_cors_headers(response_data)
+        headers = [
+            "Content-Type" => "application/json",
+            "Access-Control-Allow-Origin" => "*",
+            "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
+            "Access-Control-Max-Age" => "86400"
+        ]
+        return HTTP.Response(200, headers, JSON3.write(response_data))
+    end
+
+    # Note: @options not supported in this Oxygen.jl version - CORS handled by middleware
+
     @get app(BASE_PATH * "/dao/{dao_id}/proposals") function(req, dao_id)
         # Mock response for now
-        Dict("proposals" => [
+        response_data = Dict("proposals" => [
             Dict(
                 "address" => "prop1",
                 "title" => "Test Proposal 1",
@@ -284,6 +298,7 @@ function register_routes(app=nothing)
                 "created_at" => "2025-06-19T11:00:00Z"
             )
         ])
+        return add_cors_headers(response_data)
     end
 
     @get app(BASE_PATH * "/dao/{dao_id}/proposals/{proposal_id}") function(req, dao_id, proposal_id)
