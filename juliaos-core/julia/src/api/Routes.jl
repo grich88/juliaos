@@ -749,3 +749,6 @@ Remember: You're not just answering questions - you're a collaborative partner i
     # Return the configured router
     return app
 end
+
+# End of Routes module
+end # module Routes
