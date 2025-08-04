@@ -145,13 +145,13 @@ function register_routes(app=nothing)
         end
     end
 
-    @get test_router("/query") function(req, name::String="Guest", age::Int=18)
+    @get app(BASE_PATH * "/test/query") function(req, name::String="Guest", age::Int=18)
         with_cache() do
             Dict("message" => "Hello, $name You are $age years old.")
         end
     end
 
-    @post test_router("/post") function(req)
+    @post app(BASE_PATH * "/test/post") function(req)
         # Validate request
         schema = Dict("name" => String, "age" => Int)
         if (error = validate_request(req, schema)) !== nothing
