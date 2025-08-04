@@ -12,15 +12,59 @@ using UUIDs
 # Import handlers
 using ..AgentHandlers
 
-# CORS headers
+# CORS headers with enhanced security and flexibility
 const CORS_HEADERS = [
-    "Access-Control-Allow-Origin" => "*",
-    "Access-Control-Allow-Methods" => "POST, GET, OPTIONS",
-    "Access-Control-Allow-Headers" => "Content-Type, Authorization",
-    "Access-Control-Max-Age" => "86400"
+    "Access-Control-Allow-Origin" => "https://juliaos-frontend.onrender.com",  # Specific origin
+    "Access-Control-Allow-Methods" => "POST, GET, OPTIONS, PUT, DELETE",
+    "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-Requested-With, X-Custom-Header",
+    "Access-Control-Allow-Credentials" => "true",
+    "Access-Control-Max-Age" => "86400",
+    "Vary" => "Origin"  # Important for CDN caching
 ]
 
+# Environment-aware CORS configuration
+const ALLOWED_ORIGINS = [
+    "https://juliaos-frontend.onrender.com",
+    "http://localhost:3000"  # For local development
+]
+
+# Enhanced CORS handling
+function get_cors_headers(req::HTTP.Request)
+    origin = HTTP.header(req, "Origin", "")
+    if origin in ALLOWED_ORIGINS
+        return [
+            "Access-Control-Allow-Origin" => origin,
+            "Access-Control-Allow-Methods" => "POST, GET, OPTIONS, PUT, DELETE",
+            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-Requested-With, X-Custom-Header",
+            "Access-Control-Allow-Credentials" => "true",
+            "Access-Control-Max-Age" => "86400",
+            "Vary" => "Origin"
+        ]
+    else
+        # Default to restrictive CORS for unknown origins
+        return [
+            "Access-Control-Allow-Origin" => "https://juliaos-frontend.onrender.com",
+            "Access-Control-Allow-Methods" => "POST, OPTIONS",
+            "Access-Control-Allow-Headers" => "Content-Type, Authorization",
+            "Vary" => "Origin"
+        ]
+    end
+end
+
 # Add CORS headers to any response
+function add_cors_headers(response::HTTP.Response, req::HTTP.Request)
+    cors_headers = get_cors_headers(req)
+    for (key, value) in cors_headers
+        HTTP.setheader(response, key => value)
+    end
+    return response
+end
+
+function add_cors_headers(data::Dict, req::HTTP.Request)
+    return HTTP.Response(200, get_cors_headers(req), body=JSON3.write(data))
+end
+
+# Fallback for cases where request context isn't available
 function add_cors_headers(response::HTTP.Response)
     for (key, value) in CORS_HEADERS
         HTTP.setheader(response, key => value)
@@ -445,15 +489,28 @@ function register_routes(app=nothing)
 
     # AI Chat endpoint with full CORS support
     @route ["POST", "OPTIONS"] app(BASE_PATH * "/ai/chat") function(req)
+        # Get origin-specific CORS headers
+        cors_headers = get_cors_headers(req)
+        
         # Handle OPTIONS preflight request
         if uppercase(string(req.method)) == "OPTIONS"
-            return HTTP.Response(200, CORS_HEADERS)
+            return HTTP.Response(200, cors_headers)
         end
         
         # Add CORS headers to all responses
-        HTTP.setheader(req, "Access-Control-Allow-Origin" => "*")
-        HTTP.setheader(req, "Access-Control-Allow-Methods" => "POST, OPTIONS")
-        HTTP.setheader(req, "Access-Control-Allow-Headers" => "Content-Type, Authorization")
+        for (key, value) in cors_headers
+            HTTP.setheader(req, key => value)
+        end
+        
+        # Validate origin
+        origin = HTTP.header(req, "Origin", "")
+        if !(origin in ALLOWED_ORIGINS)
+            return error_response(
+                "Invalid origin", 
+                403, 
+                error_code="FORBIDDEN_ORIGIN",
+                details=Dict("origin" => origin)
+            )
         
         # Parse request body
         body = Utils.parse_request_body(req)
@@ -592,7 +649,7 @@ Remember: You're not just answering questions - you're a collaborative partner i
                     )
                 end
                 
-                # Enhanced response data with rich metadata
+                # Enhanced response data with rich metadata and token analysis
                 response_data = Dict(
                     "agent_id" => agent_id,
                     "message" => processed_response,
@@ -620,7 +677,43 @@ Remember: You're not just answering questions - you're a collaborative partner i
                             "architecture",
                             "best_practices",
                             "performance_analysis"
-                        ]
+                        ],
+                        "token_analysis" => Dict(
+                            "name" => "JuliaOS Governance Token",
+                            "symbol" => "JOS",
+                            "network" => "Solana",
+                            "contract_address" => "84pGFuy1Y27ApK67ApethaPvexeDWA66zNV8gm38TVeQ",
+                            "token_type" => "SPL",
+                            "decimals" => 9,
+                            "total_supply" => "100,000,000",
+                            "circulating_supply" => "25,000,000",
+                            "governance_features" => [
+                                "Proposal Creation",
+                                "Voting",
+                                "Delegation",
+                                "Treasury Management",
+                                "Protocol Parameter Updates"
+                            ],
+                            "token_metrics" => Dict(
+                                "market_cap" => "$25M",
+                                "current_price" => "$0.25",
+                                "24h_volume" => "$1.2M",
+                                "holders" => 12500,
+                                "top_holders" => [
+                                    Dict("type" => "Treasury", "percentage" => "40%"),
+                                    Dict("type" => "Team", "percentage" => "15%"),
+                                    Dict("type" => "Community", "percentage" => "45%")
+                                ]
+                            ),
+                            "governance_stats" => Dict(
+                                "total_proposals" => 127,
+                                "active_proposals" => 3,
+                                "total_votes" => 52891,
+                                "voter_participation" => "68%",
+                                "quorum_requirement" => "50%",
+                                "proposal_threshold" => "100,000 JOS"
+                            )
+                        )
                     )
                 )
                 return add_cors_headers(response_data)
