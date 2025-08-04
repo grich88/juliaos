@@ -409,9 +409,83 @@ function register_routes(app=nothing)
         return add_cors_headers(response_data)
     end
 
-    # Note: Oxygen.jl v1.7.2 doesn't support explicit OPTIONS handlers for parameterized routes
-    # CORS is handled entirely by middleware in MainServer.jl which adds headers to all responses
-    # The frontend should work correctly with the middleware-based CORS implementation
+    # AI Chat endpoint with full CORS support
+    @route ["POST", "OPTIONS"] app(BASE_PATH * "/ai/chat") function(req)
+        # Handle OPTIONS preflight request
+        if uppercase(string(req.method)) == "OPTIONS"
+            return add_cors_headers(Dict("status" => "OK"))
+        end
+        
+        # Parse request body
+        body = Utils.parse_request_body(req)
+        if isnothing(body) || !haskey(body, "message") || !isa(body["message"], String) || isempty(body["message"])
+            return Utils.error_response("Request body must include a non-empty 'message' string", 400)
+        end
+        
+        # Get or create AI agent
+        agent_id = get(body, "agent_id", nothing)
+        if isnothing(agent_id)
+            # Create new agent for this chat
+            cfg = AgentConfig(
+                "chat_agent_$(string(uuid4())[1:8])", 
+                AgentType(:CUSTOM),
+                abilities=["llm_chat", "evaluate_fitness"],
+                parameters=Dict(
+                    "model" => "gpt-4-turbo",
+                    "temperature" => 0.7,
+                    "max_tokens" => 2000,
+                    "top_p" => 0.95,
+                    "presence_penalty" => 0.1,
+                    "frequency_penalty" => 0.1,
+                    "system_prompt" => """You are an expert AI assistant with deep knowledge of Julia programming, 
+                    software architecture, and system design. You excel at providing detailed, accurate technical 
+                    advice while maintaining a professional and friendly tone. You can help with code review, 
+                    debugging, optimization, and architectural decisions."""
+                )
+            )
+            new_agent = Agents.createAgent(cfg)
+            agent_id = new_agent.id
+            Agents.startAgent(agent_id)
+        end
+        
+        # Execute chat task
+        task_payload = Dict(
+            "ability" => "llm_chat",
+            "input" => Dict(
+                "message" => body["message"],
+                "context" => get(body, "context", Dict()),
+                "history" => get(body, "history", [])
+            )
+        )
+        
+        result = execute_async() do
+            Agents.executeAgentTask(agent_id, task_payload)
+        end
+        
+        # Process result
+        if get(result, "success", false)
+            task_id = result["task_id"]
+            task_result = Agents.getTaskResult(agent_id, task_id)
+            
+            if get(task_result, "status", "") == "completed"
+                response_data = Dict(
+                    "agent_id" => agent_id,
+                    "message" => get(task_result, "response", ""),
+                    "metadata" => Dict(
+                        "model" => "gpt-4-turbo",
+                        "task_id" => task_id,
+                        "timestamp" => string(now()),
+                        "context" => get(task_result, "context", Dict())
+                    )
+                )
+                return add_cors_headers(response_data)
+            else
+                return Utils.error_response("Chat task failed or timed out", 500)
+            end
+        else
+            return Utils.error_response("Failed to execute chat task", 500)
+        end
+    end
     
     @info "API routes registered with Oxygen under $BASE_PATH with enhanced CORS support and health endpoints."
     
