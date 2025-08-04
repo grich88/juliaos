@@ -62,6 +62,7 @@ export function ProposalAnalysis({ proposalAddress, onBack }: ProposalAnalysisPr
           headers: {
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({ request_analysis: true })
         }
       )
 

@@ -374,8 +374,10 @@ function register_routes(app=nothing)
         return add_cors_headers(response_data)
     end
 
-    # All OPTIONS requests are now handled by aggressive middleware in MainServer.jl
-    # The before_request middleware catches ALL OPTIONS requests before routing
+
+
+    # The aggressive middleware in MainServer.jl should handle all OPTIONS requests
+    # Frontend has been updated to send proper POST body to match backend expectations
 
     # All routes are already registered directly on the main app
     # No mounting needed - Oxygen routes are already part of the main app context
