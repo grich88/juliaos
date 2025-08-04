@@ -119,23 +119,20 @@ function register_routes(app=nothing)
     )
     
     # Add health endpoints directly to main app router
-    @get app BASE_PATH * "/health" function(req)
+    @get app(BASE_PATH * "/health") function(req)
         return health_response()
     end
     
     # Also add root health endpoint
-    @get app "/" function(req)
+    @get app("/") function(req)
         return health_response()
     end
     
-    @options app "/" function(req)
+    @options app("/") function(req)
         return HTTP.Response(200, ["Content-Type" => "application/json"], body="")
     end
     
-    # Add HEAD support for health checks
-    @route app "HEAD" "/" function(req)
-        return HTTP.Response(200, ["Content-Type" => "application/json"], body="")
-    end
+    # HEAD support handled automatically by Oxygen.jl for GET routes
 
     # Test router group with caching
     test_router = router(BASE_PATH * "/test", tags=["Test"])
