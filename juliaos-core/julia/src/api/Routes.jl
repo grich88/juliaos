@@ -362,29 +362,48 @@ function register_routes(app=nothing)
         
         # Handle POST request - AI-powered proposal analysis
         response_data = Dict(
-            "proposal_id" => proposal_id,
-            "analysis" => Dict(
-                "risk_score" => 0.25,
-                "sentiment" => "positive",
-                "key_points" => [
+            "proposal_address" => proposal_id,
+            "proposal_title" => "Protocol Fee Reduction",
+            "proposal_description" => "Reduce trading fees from 0.3% to 0.25% to increase competitiveness against other DEXs while maintaining sustainable revenue for continued development.",
+            "financial_analysis" => Dict(
+                "treasury_impact" => "Medium - Projected 16.7% reduction in fee revenue",
+                "roi_assessment" => "Positive - Expected volume increase offsets fee reduction",
+                "risk_level" => "Low",
+                "recommendations" => [
+                    "Consider phased fee reduction",
+                    "Set up monitoring for volume changes",
+                    "Prepare contingency for revenue shortfall"
+                ]
+            ),
+            "technical_analysis" => Dict(
+                "complexity" => "Low",
+                "security_risks" => [
+                    "No significant security concerns",
+                    "Standard parameter update",
+                    "Well-tested fee mechanism"
+                ],
+                "feasibility" => "High - Simple parameter change",
+                "timeline" => "Immediate implementation possible"
+            ),
+            "sentiment_analysis" => Dict(
+                "tone" => "Professional and well-researched",
+                "clarity" => "High - Clear objectives and rationale",
+                "potential_reception" => "Generally positive",
+                "contentious_points" => [
+                    "Revenue impact concerns",
+                    "Competitive pressure vs stability",
+                    "Timing of implementation"
+                ]
+            ),
+            "aggregated_summary" => Dict(
+                "overall_score" => 85,
+                "recommendation" => "APPROVE",
+                "key_considerations" => [
                     "Strong community support indicated",
                     "Reasonable budget allocation",
                     "Clear implementation timeline",
-                    "Minimal technical risks identified"
-                ],
-                "recommendations" => [
-                    "Consider extending voting period by 24 hours",
-                    "Request additional technical specification details",
-                    "Monitor community sentiment closely"
-                ],
-                "confidence" => 0.87,
-                "voting_recommendation" => "APPROVE",
-                "analysis_timestamp" => string(now())
-            ),
-            "ai_insights" => Dict(
-                "governance_health" => "strong",
-                "proposal_quality" => "high",
-                "community_engagement" => "active"
+                    "Minimal technical risks"
+                ]
             )
         )
         return add_cors_headers(response_data)
