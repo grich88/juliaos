@@ -30,7 +30,6 @@ services:
         value: 18.17.0
       - key: NPM_VERSION
         value: 9.6.7
-    envVars:
       - key: NEXT_PUBLIC_API_URL
         fromService:
           name: juliaos-backend
