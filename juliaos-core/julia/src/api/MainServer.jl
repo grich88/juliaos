@@ -171,13 +171,17 @@ function start_server(;
             port=api_port,
             before_request=[
                 req -> begin
-                    # Handle preflight requests
-                    if req.method == "OPTIONS"
+                    # AGGRESSIVE OPTIONS handling - catch ALL OPTIONS requests
+                    if uppercase(string(req.method)) == "OPTIONS"
+                        @info "Handling OPTIONS request for: $(req.target)"
                         # Add CORS headers to response
-                        headers = Pair{String,String}[]
-                        for (key, value) in CORS_HEADERS
-                            push!(headers, key => value)
-                        end
+                        headers = [
+                            "Content-Type" => "application/json",
+                            "Access-Control-Allow-Origin" => "*",
+                            "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
+                            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
+                            "Access-Control-Max-Age" => "86400"
+                        ]
                         return HTTP.Response(200, headers, "")
                     end
                     
