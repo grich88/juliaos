@@ -90,3 +90,5 @@ else
     # The modules are loaded, and `main()` can be called explicitly.
     @info "Backend modules loaded. Call main() to start the server."
 end
+
+end # module Main

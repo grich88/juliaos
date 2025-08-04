@@ -82,3 +82,5 @@ function reset_agent_metrics_handler(req::HTTP.Request, agent_id::String)
 end
 
 end
+end
+end # module MetricsHandlers
