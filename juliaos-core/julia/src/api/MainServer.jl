@@ -174,11 +174,11 @@ function start_server(;
                     # Handle preflight requests
                     if req.method == "OPTIONS"
                         # Add CORS headers to response
-                        response = HTTP.Response(200)
+                        headers = Pair{String,String}[]
                         for (key, value) in CORS_HEADERS
-                            push!(response.headers, key => value)
+                            push!(headers, key => value)
                         end
-                        return response
+                        return HTTP.Response(200, headers, "")
                     end
                     
                     # Add basic context to request (LeverageSystem loaded lazily)
@@ -192,11 +192,9 @@ function start_server(;
             ],
             after_request=[
                 (req, res) -> begin
-                    # Add CORS headers to all responses
+                    # Add CORS headers to all responses - force add them
                     for (key, value) in CORS_HEADERS
-                        if !haskey(res.headers, key)
-                            push!(res.headers, key => value)
-                        end
+                        push!(res.headers, key => value)
                     end
                     
                     # Clean up Leverage context (if loaded)
