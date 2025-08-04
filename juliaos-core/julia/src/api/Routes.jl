@@ -695,9 +695,9 @@ Remember: You're not just answering questions - you're a collaborative partner i
                                 "Protocol Parameter Updates"
                             ],
                             "token_metrics" => Dict(
-                                "market_cap" => "$25M",
-                                "current_price" => "$0.25",
-                                "24h_volume" => "$1.2M",
+                                "market_cap" => "25M USD",
+                                "current_price" => "0.25 USD",
+                                "24h_volume" => "1.2M USD",
                                 "holders" => 12500,
                                 "top_holders" => [
                                     Dict("type" => "Treasury", "percentage" => "40%"),
