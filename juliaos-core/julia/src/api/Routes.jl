@@ -202,72 +202,71 @@ function register_routes(app=nothing)
     end
 
     # Agent lifecycle control with async execution
-    @post app("/{agent_id}/start") function(req, agent_id)
+    @post app(BASE_PATH * "/agents/{agent_id}/start") function(req, agent_id)
         execute_async() do
             AgentHandlers.start_agent_handler(req, agent_id)
         end
     end
 
-    @post app("/{agent_id}/stop") function(req, agent_id)
+    @post app(BASE_PATH * "/agents/{agent_id}/stop") function(req, agent_id)
         execute_async() do
             AgentHandlers.stop_agent_handler(req, agent_id)
         end
     end
 
-    @post app("/{agent_id}/pause") function(req, agent_id)
+    @post app(BASE_PATH * "/agents/{agent_id}/pause") function(req, agent_id)
         execute_async() do
             AgentHandlers.pause_agent_handler(req, agent_id)
         end
     end
 
-    @post app("/{agent_id}/resume") function(req, agent_id)
+    @post app(BASE_PATH * "/agents/{agent_id}/resume") function(req, agent_id)
         execute_async() do
             AgentHandlers.resume_agent_handler(req, agent_id)
         end
     end
 
     # Task management with caching for read operations
-    @post app("/{agent_id}/tasks") function(req, agent_id)
+    @post app(BASE_PATH * "/agents/{agent_id}/tasks") function(req, agent_id)
         execute_async() do
             AgentHandlers.execute_agent_task_handler(req, agent_id)
         end
     end
 
-    @get app("/{agent_id}/tasks") function(req, agent_id)
+    @get app(BASE_PATH * "/agents/{agent_id}/tasks") function(req, agent_id)
         with_cache() do
             AgentHandlers.list_agent_tasks_handler(req, agent_id)
         end
     end
 
-    @get app("/{agent_id}/tasks/{task_id}") function(req, agent_id, task_id)
+    @get app(BASE_PATH * "/agents/{agent_id}/tasks/{task_id}") function(req, agent_id, task_id)
         with_cache(5.0) do # Short TTL for task status
             AgentHandlers.get_task_status_handler(req, agent_id, task_id)
         end
     end
 
-    @get app("/{agent_id}/tasks/{task_id}/result") function(req, agent_id, task_id)
+    @get app(BASE_PATH * "/agents/{agent_id}/tasks/{task_id}/result") function(req, agent_id, task_id)
         with_cache() do
             AgentHandlers.get_task_result_handler(req, agent_id, task_id)
         end
     end
 
     # Memory access with caching
-    @get app("/{agent_id}/memory/{key}") function(req, agent_id, key)
+    @get app(BASE_PATH * "/agents/{agent_id}/memory/{key}") function(req, agent_id, key)
         with_cache() do
             AgentHandlers.get_agent_memory_handler(req, agent_id, key)
         end
     end
 
-    @post app("/{agent_id}/memory/{key}") function(req, agent_id, key)
+    @post app(BASE_PATH * "/agents/{agent_id}/memory/{key}") function(req, agent_id, key)
         execute_async() do
             AgentHandlers.set_agent_memory_handler(req, agent_id, key)
         end
     end
 
-    # DAO router group
-    app = router(BASE_PATH * "/dao", tags=["DAO Management"])
+    # DAO routes (registered directly on main app)
 
-    @get app("/{dao_id}/proposals") function(req, dao_id)
+    @get app(BASE_PATH * "/dao/{dao_id}/proposals") function(req, dao_id)
         # Mock response for now
         Dict("proposals" => [
             Dict(
@@ -287,7 +286,7 @@ function register_routes(app=nothing)
         ])
     end
 
-    @get app("/{dao_id}/proposals/{proposal_id}") function(req, dao_id, proposal_id)
+    @get app(BASE_PATH * "/dao/{dao_id}/proposals/{proposal_id}") function(req, dao_id, proposal_id)
         with_cache() do
             # Mock response for now
             Dict(
