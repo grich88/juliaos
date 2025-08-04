@@ -3,6 +3,7 @@
 # Server configuration
 const DEFAULT_PORT = get(ENV, "PORT", "8080")
 const HOST = get(ENV, "HOST", "0.0.0.0")
+const BASE_PATH = "/api/v1"  # API version path
 
 """
 JuliaOS DAO Governance Analysis System
@@ -742,6 +743,7 @@ function register_routes(app=nothing)
                             "juliaos.chain.query",  # Native chain querying
                             "juliaos.ipfs.store",   # IPFS storage for proposal data
                             "juliaos.ml.predict"    # ML-based outcome prediction
+                        ],
                         parameters=Dict(
                             "specialization" => "proposal_analysis",
                             "focus_areas" => ["technical_feasibility", "economic_impact", "governance_implications"]
@@ -757,6 +759,7 @@ function register_routes(app=nothing)
                             "juliaos.defi.analyze",     # DeFi protocol analysis
                             "juliaos.market.predict",   # Market prediction models
                             "juliaos.sentiment.analyze" # Social sentiment analysis
+                        ],
                         parameters=Dict(
                             "specialization" => "market_impact",
                             "data_sources" => ["onchain_metrics", "market_data", "social_sentiment"]
@@ -772,6 +775,7 @@ function register_routes(app=nothing)
                             "juliaos.dao.simulate",    # DAO simulation engine
                             "juliaos.voting.analyze",  # Voting pattern analysis
                             "juliaos.game.theory"      # Game theory optimization
+                        ],
                         parameters=Dict(
                             "specialization" => "governance_rules",
                             "frameworks" => ["voting_power", "quorum_requirements", "execution_timeline"]
@@ -792,7 +796,8 @@ function register_routes(app=nothing)
                         "juliaos.consensus.reach",   # Multi-agent consensus
                         "juliaos.parallel.execute",  # Parallel execution
                         "juliaos.knowledge.graph"    # Knowledge graph building
-                parameters=Dict(
+                    ],
+                    parameters=Dict(
                     "model" => "gpt-4-turbo-preview",
                     "temperature" => 0.8,
                     "max_tokens" => 4096,
@@ -1082,13 +1087,18 @@ Remember: You're not just answering questions - you're a collaborative partner i
     
     # Add startup health check endpoint
     @get app("/") function(req::HTTP.Request)
-        return HTTP.Response(200, ["Content-Type" => "application/json"], 
+        return HTTP.Response(200, 
+            vcat(
+                ["Content-Type" => "application/json"],
+                CORS_HEADERS
+            ), 
             body=JSON3.write(Dict(
                 "status" => "running",
                 "service" => "juliaos-backend",
                 "version" => "1.0.0",
                 "port" => DEFAULT_PORT,
-                "host" => HOST
+                "host" => HOST,
+                "base_path" => BASE_PATH
             ))
         )
     end
