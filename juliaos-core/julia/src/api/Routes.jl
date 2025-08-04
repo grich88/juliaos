@@ -370,19 +370,9 @@ function register_routes(app=nothing)
         return add_cors_headers(response_data)
     end
 
-    # Add explicit OPTIONS handlers for parameterized routes to fix CORS preflight
-    # Using function-style registration for better compatibility with Oxygen.jl v1.7.2
-    Oxygen.options(app, BASE_PATH * "/dao/{dao_id}/proposals") do req, dao_id
-        return add_cors_headers(Dict("status" => "OK"))
-    end
-
-    Oxygen.options(app, BASE_PATH * "/dao/{dao_id}/proposals/{proposal_id}") do req, dao_id, proposal_id
-        return add_cors_headers(Dict("status" => "OK"))
-    end
-
-    Oxygen.options(app, BASE_PATH * "/proposals/{proposal_id}/analyze") do req, proposal_id
-        return add_cors_headers(Dict("status" => "OK"))
-    end
+    # Note: Oxygen.jl v1.7.2 doesn't support explicit OPTIONS handlers for parameterized routes
+    # CORS is handled entirely by middleware in MainServer.jl which adds headers to all responses
+    # The frontend should work correctly with the middleware-based CORS implementation
     
     @info "API routes registered with Oxygen under $BASE_PATH with enhanced CORS support and health endpoints."
     
