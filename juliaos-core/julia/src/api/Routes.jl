@@ -711,6 +711,7 @@ function register_routes(app=nothing)
                 error_code="FORBIDDEN_ORIGIN",
                 details=Dict("origin" => origin)
             )
+        end
 
         # Parse request body
         body = Utils.parse_request_body(req)
@@ -1094,6 +1095,9 @@ Remember: You're not just answering questions - you're a collaborative partner i
     end
 
     # Configure server startup
+    @info "Starting JuliaOS Backend..."
+    @info "Host: $HOST, Port: $DEFAULT_PORT"
+    @info "Registering routes..."
     server = Oxygen.serve(
         app,
         HOST,
@@ -1106,7 +1110,7 @@ Remember: You're not just answering questions - you're a collaborative partner i
         connection_count=100,
         keep_alive=true
     )
-
+    @info "Oxygen server started"
     @info "JuliaOS Backend started on http://$(HOST):$(DEFAULT_PORT)"
 
     # Return the configured router and server
