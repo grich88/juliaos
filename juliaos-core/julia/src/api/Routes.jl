@@ -374,7 +374,41 @@ function register_routes(app=nothing)
         return add_cors_headers(response_data)
     end
 
+    # Explicit OPTIONS handler for proposal analysis endpoint
+    @options app(BASE_PATH * "/proposals/{proposal_id}/analyze") function(req, proposal_id)
+        headers = [
+            "Content-Type" => "application/json",
+            "Access-Control-Allow-Origin" => "*",
+            "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
+            "Access-Control-Max-Age" => "86400"
+        ]
+        return HTTP.Response(200, headers, "")
+    end
 
+    # Explicit OPTIONS handler for proposals list
+    @options app(BASE_PATH * "/dao/{dao_id}/proposals") function(req, dao_id)
+        headers = [
+            "Content-Type" => "application/json",
+            "Access-Control-Allow-Origin" => "*",
+            "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
+            "Access-Control-Max-Age" => "86400"
+        ]
+        return HTTP.Response(200, headers, "")
+    end
+
+    # Explicit OPTIONS handler for single proposal details
+    @options app(BASE_PATH * "/dao/{dao_id}/proposals/{proposal_id}") function(req, dao_id, proposal_id)
+        headers = [
+            "Content-Type" => "application/json",
+            "Access-Control-Allow-Origin" => "*",
+            "Access-Control-Allow-Methods" => "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers" => "Content-Type, Authorization, X-API-Key, Accept",
+            "Access-Control-Max-Age" => "86400"
+        ]
+        return HTTP.Response(200, headers, "")
+    end
 
     # The aggressive middleware in MainServer.jl should handle all OPTIONS requests
     # Frontend has been updated to send proper POST body to match backend expectations
