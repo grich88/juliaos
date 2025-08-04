@@ -388,10 +388,10 @@ function get_dex_order_status_handler(req::HTTP.Request, protocol::String, versi
         "token0_symbol" => dex_order_status_obj.pair.token0.symbol,
         "token1_symbol" => dex_order_status_obj.pair.token1.symbol
     )
-    if !isnothing(cached_data_tuple)
-        cached_payload, _ = cached_data_tuple
-        if isa(cached_payload, Dict) && haskey(cached_payload, "pair_details_for_reconstruction")
-            pair_details_cache = cached_payload["pair_details_for_reconstruction"]
+    if !isnothing(loaded_data_tuple) # Use loaded_data_tuple here
+        cached_data_tuple, _ = loaded_data_tuple
+        if isa(cached_data_tuple, Dict) && haskey(cached_data_tuple, "pair_details_for_reconstruction")
+            pair_details_cache = cached_data_tuple["pair_details_for_reconstruction"]
             pair_info_for_response["id"] = get(pair_details_cache, "id", dex_order_status_obj.pair.id) # Prefer cached if available
             pair_info_for_response["token0_symbol"] = get(pair_details_cache, "token0_sym", dex_order_status_obj.pair.token0.symbol)
             pair_info_for_response["token1_symbol"] = get(pair_details_cache, "token1_sym", dex_order_status_obj.pair.token1.symbol)
@@ -412,13 +412,13 @@ function get_dex_order_status_handler(req::HTTP.Request, protocol::String, versi
     )
     
     # Supplement with original amount/price from cache if the status object has defaults (0.0)
-    if order_dict["amount"] == 0.0 && !isnothing(cached_data_tuple)
-        cached_payload, _ = cached_data_tuple
-        if isa(cached_payload, Dict)
-            order_dict["amount"] = get(cached_payload, "amount", 0.0)
-            order_dict["price"] = get(cached_payload, "price", 0.0)
+    if order_dict["amount"] == 0.0 && !isnothing(loaded_data_tuple) # Use loaded_data_tuple here
+        cached_data_tuple, _ = loaded_data_tuple
+        if isa(cached_data_tuple, Dict)
+            order_dict["amount"] = get(cached_data_tuple, "amount", 0.0)
+            order_dict["price"] = get(cached_data_tuple, "price", 0.0)
             # Could also add "timestamp_created" from cache
-            order_dict["timestamp_created"] = string(unix2datetime(get(cached_payload, "timestamp_created", 0.0)))
+            order_dict["timestamp_created"] = string(unix2datetime(get(cached_data_tuple, "timestamp_created", 0.0)))
         end
     end
 
@@ -460,7 +460,7 @@ function cancel_dex_order_handler(req::HTTP.Request, protocol::String, version::
     end
 end
 
-end
+end # module DexHandlers
 
 function associate_tx_hash_handler(req::HTTP.Request, protocol::String, version::String, order_id::String)
     if isempty(order_id)
