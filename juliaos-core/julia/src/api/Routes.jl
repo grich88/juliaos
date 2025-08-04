@@ -749,5 +749,3 @@ Remember: You're not just answering questions - you're a collaborative partner i
     # Return the configured router
     return app
 end
-
-end
