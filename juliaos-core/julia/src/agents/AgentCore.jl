@@ -33,13 +33,8 @@ function register_ability(name::String, fn::Function)
     end
 end
 
-# Define missing types that other modules expect
-struct AgentType
-    name::String
-    category::String
-end
-
-const CUSTOM = AgentType("custom", "user_defined")
+# CUSTOM constant is now available from AgentTypes module
+# const CUSTOM is imported from AgentTypes
 
 # Define missing memory and queue implementations
 struct OrderedDictAgentMemory <: AbstractAgentMemory
@@ -83,7 +78,7 @@ end
 # Export types and functions
 export Agent, AgentConfig, register_ability,
        AGENTS, AGENT_THREADS, ABILITY_REGISTRY, AGENTS_LOCK,
-       AgentType, CUSTOM, OrderedDictAgentMemory, PriorityAgentQueue,
+       OrderedDictAgentMemory, PriorityAgentQueue,
        set_value!, get_value, clear!, getAgentStatus
 
 end # module

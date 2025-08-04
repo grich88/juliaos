@@ -10,10 +10,19 @@ using Dates
 using Base.Threads: ReentrantLock
 using ..types: AbstractLLMIntegration, AbstractAgentMemory, AbstractAgentQueue
 
+# Agent Type enum (must be defined before AgentConfig)
+@enum AgentType begin
+    BASIC
+    ADVANCED
+    CUSTOM
+    MONITORING
+    ANALYSIS
+end
+
 # Agent Configuration
 struct AgentConfig
     name::String
-    type::Symbol
+    type::AgentType
     abilities::Vector{String}
     chains::Vector{Dict{String, Any}}
     parameters::Dict{String, Any}
@@ -110,7 +119,8 @@ mutable struct Agent
 end
 
 # Export types and functions
-export AgentStatus, TaskStatus, Schedule, Skill, SkillState, TaskResult, Agent, AgentConfig,
+export AgentType, AgentStatus, TaskStatus, Schedule, Skill, SkillState, TaskResult, Agent, AgentConfig,
+       BASIC, ADVANCED, CUSTOM, MONITORING, ANALYSIS,
        CREATED, INITIALIZING, RUNNING, PAUSED, STOPPED, ERROR,
        TASK_PENDING, TASK_RUNNING, TASK_COMPLETED, TASK_FAILED, TASK_CANCELLED, TASK_UNKNOWN
 
